@@ -128,6 +128,8 @@ import eikon as ek
 import warnings
 import datetime
 
+ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
+
 # Define the date range
 start_date = '2024-01-01'
 end_date = '2024-03-01'
