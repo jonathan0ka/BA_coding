@@ -157,7 +157,7 @@ for specific_date in business_days:
         print(f"Error fetching data: {err}")
         continue  # Skip this iteration if there's an error
 
-    print(df)
+    #print(df)
 
     # Get the market cap for each constituent
     df2, err = ek.get_data(
@@ -170,7 +170,7 @@ for specific_date in business_days:
         print(f"Error fetching data: {err}")
         continue  # Skip this iteration if there's an error
 
-    print(df2)
+    #print(df2)
 
     # Data Preparation: Ensure no leading/trailing whitespaces
     # df['Constituent RIC'] = df['Constituent RIC'].str.strip()
@@ -188,5 +188,13 @@ for specific_date in business_days:
     # Append the merged dataframe to the aggregated dataframe
     aggregated_df = pd.concat([aggregated_df, merged_df], ignore_index=True)
 
+    #columns_to_keep = ["Constituent RIC", "Constituent Name", "Company Market Cap", "Date"]
+    #aggregated_df = aggregated_df[columns_to_keep]
+
 # Now aggregated_df contains all the merged data with the date column
-print(aggregated_df)
+# print(aggregated_df)
+
+
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\constituents_stoxx_europe_600"
+aggregated_df.to_csv(file_path, index=False)
+print(f"Data exported successfully")
