@@ -122,7 +122,9 @@
 #     print("No data to fetch or export.")
 
 
-####################
+################################################################################
+# v1
+################################################################################
 import pandas as pd
 import eikon as ek
 import warnings
@@ -134,6 +136,9 @@ ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
 start_date = '2024-01-01'
 end_date = '2024-03-01'
 
+# Initialize an empty DataFrame to aggregate the results
+aggregated_df = pd.DataFrame()
+
 # Generate the last business day of each month within the date range
 business_days = pd.date_range(start=start_date, end=end_date, freq="BM")
 
@@ -141,20 +146,40 @@ for specific_date in business_days:
     sdate_for_year = specific_date.strftime("%Y-%m-%d")
     print(sdate_for_year)
     
+    # Get the constituents of the index
     df, err = ek.get_data(
-        instruments = ['.STOXX'],
-        fields = ['TR.IndexConstituentRIC', 'TR.IndexConstituentName'],
-        parameters = {
-            'SDate':sdate_for_year
-        }
+        instruments=['.STOXX'],
+        fields=['TR.IndexConstituentRIC', 'TR.IndexConstituentName'],
+        parameters={'SDate': sdate_for_year}
     )
-    print(df)
     
+    if err:
+        print(f"Error fetching data: {err}")
+        continue  # Skip this iteration if there's an error
+
+    print(df)
+
+    # Get the market cap for each constituent
     df2, err = ek.get_data(
-        instruments = df['Constituent RIC'].tolist(),
-        fields = ['TR.CompanyMarketCap'],
-        parameters = {
-            'SDate': sdate_for_year
-        }
+        instruments=df['TR.IndexConstituentRIC'].tolist(),
+        fields=['TR.CompanyMarketCap'],
+        parameters={'SDate': sdate_for_year}
     )
+    
+    if err:
+        print(f"Error fetching data: {err}")
+        continue  # Skip this iteration if there's an error
+
     print(df2)
+
+    # Merge the two dataframes on the 'TR.IndexConstituentRIC' column
+    merged_df = pd.merge(df, df2, on='TR.IndexConstituentRIC')
+    
+    # Add the date column to the merged dataframe
+    merged_df['Date'] = sdate_for_year
+    
+    # Append the merged dataframe to the aggregated dataframe
+    aggregated_df = pd.concat([aggregated_df, merged_df], ignore_index=True)
+
+# Now aggregated_df contains all the merged data with the date column
+print(aggregated_df)
