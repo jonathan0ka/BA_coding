@@ -1,6 +1,9 @@
 # test change
 # test change windows
 
+# 600 --> 2000
+# 100 * 2000 * 365
+
 
 # import pandas as pd
 # import eikon as ek
