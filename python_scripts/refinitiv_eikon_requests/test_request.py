@@ -172,15 +172,15 @@ for specific_date in business_days:
 
     print(df2)
 
-        # Data Preparation: Ensure no leading/trailing whitespaces
-    df['Constituent RIC'] = df['Constituent RIC'].str.strip()
-    df2['Constituent RIC'] = df2['Constituent RIC'].str.strip()
+    # Data Preparation: Ensure no leading/trailing whitespaces
+    # df['Constituent RIC'] = df['Constituent RIC'].str.strip()
+    # df2['Constituent RIC'] = df2['Constituent RIC'].str.strip()
 
     # Merge the dataframes
-    merged_df = pd.merge(df, df2, on='Constituent RIC', how='left')
+    #merged_df = pd.merge(df, df2, on='Constituent RIC', how='left')
 
     # Merge the two dataframes on the 'TR.IndexConstituentRIC' column
-    #merged_df = pd.merge(df, df2, on='Constituent RIC')
+    merged_df = pd.merge(df, df2, left_on='Constituent RIC', right_on='Instrument', how='left')
     
     # Add the date column to the merged dataframe
     merged_df['Date'] = sdate_for_year
