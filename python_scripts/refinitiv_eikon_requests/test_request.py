@@ -161,7 +161,7 @@ for specific_date in business_days:
 
     # Get the market cap for each constituent
     df2, err = ek.get_data(
-        instruments=df['Constituent RIC''].tolist(),
+        instruments=df['Constituent RIC'].tolist(),
         fields=['TR.CompanyMarketCap'],
         parameters={'SDate': sdate_for_year}
     )
@@ -173,7 +173,7 @@ for specific_date in business_days:
     print(df2)
 
     # Merge the two dataframes on the 'TR.IndexConstituentRIC' column
-    merged_df = pd.merge(df, df2, on='Constituent RIC'')
+    merged_df = pd.merge(df, df2, on='Constituent RIC')
     
     # Add the date column to the merged dataframe
     merged_df['Date'] = sdate_for_year
