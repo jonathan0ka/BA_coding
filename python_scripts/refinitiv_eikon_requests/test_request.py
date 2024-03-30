@@ -136,21 +136,18 @@ end_date = '2024-03-01'
 
 # Generate the last business day of each month within the date range
 business_days = pd.date_range(start=start_date, end=end_date, freq="BM")
-business_days = business_days.normalize()
 
 for specific_date in business_days:
-    sdate_for_year = f"{specific_date}"
+    sdate_for_year = specific_date.strftime("%Y-%m-%d")
     print(sdate_for_year)
     
     df, err = ek.get_data(
         instruments = ['.STOXX'],
-        fields = ['TR.IndexConstituentRIC',
-                  'TR.IndexConstituentName'],
+        fields = ['TR.IndexConstituentRIC', 'TR.IndexConstituentName'],
         parameters = {
             'SDate':sdate_for_year
         }
     )
-    print('Constituents:')
     print(df)
     
     df2, err = ek.get_data(
