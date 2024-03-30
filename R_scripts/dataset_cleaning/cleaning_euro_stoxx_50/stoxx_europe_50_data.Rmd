@@ -1,0 +1,50 @@
+# import
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+raw_data <- read.csv("/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/RStudio/BA_Thesis/merged_data_sets/stoxx_europe_50_data.csv")
+
+raw_data$weight[raw_data$weight == ""] <- NA
+raw_data <- na.omit(raw_data, subset = "weight")
+
+cleaned_data <- raw_data[, c("ticker", "name", "weight", "price", "date")]
+
+cleaned_data$date <- as.Date(as.character(cleaned_data$date))
+cleaned_data$price <- as.numeric(gsub(",", ".", cleaned_data$price))
+```
+
+
+# check sum of weights
+```{r}
+sum_weights_raw <- cleaned_data %>%
+  group_by(date) %>%
+  summarise(sum(weight))
+
+colnames(sum_weights_raw) = c("date", "sum_weight")
+
+sum_weights_raw <- sum_weights_raw[order(sum_weights_raw$date), ]
+head(sum_weights_raw)
+
+ggplot(sum_weights_raw) +
+  geom_line(aes(x = date, y = sum_weight)) +
+  geom_hline(yintercept = 100, linetype = "dashed", color = "red") +
+  ggtitle("sum of weights for each date [raw data]")
+
+```
+
+# Are "RIGHT" positions important?
+```{r}
+result <- cleaned_data[grep("VOLKSW", cleaned_data$name), ]
+
+ggplot(result) +
+  geom_point(aes(x = date, y = weight, color = name))
+```
+```{r}
+result <- cleaned_data[grep("BBVA", cleaned_data$name), ]
+
+ggplot(result) +
+  geom_point(aes(x = date, y = weight, color = name))
+```
+
