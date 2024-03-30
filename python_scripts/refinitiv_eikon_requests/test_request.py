@@ -133,7 +133,8 @@ start_date = '2024-01-01'
 end_date = '2024-03-01'
 
 # Generate the last business day of each month within the date range
-business_days = pd.date_range(start=start_date, end=end_date, freq='BM')
+business_days = pd.date_range(start=start_date, end=end_date, freq="BM")
+business_days = business_days.normalize()
 
 for specific_date in business_days:
     sdate_for_year = f"{specific_date}"
