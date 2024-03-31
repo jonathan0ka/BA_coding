@@ -5,7 +5,7 @@ ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
 
 # # Use a company name to search for its ticker
 # company_name = "Sika"  # Example company name
-# data, err = ek.get_data(instruments=[f"R:{company_name}"], fields=['RIC', 'Name', 'ExchangeName', 'CountryISO'])
+# data, err = ek.get_data(instruments=[f"R:{company_name}"], fields=['TR.CompanyName', 'TR.PriceClose', 'TR.Volume'])
 
 # if err is None:
 #     print(data)
@@ -34,11 +34,11 @@ ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
 
 
 #######################
-fields = ["TR.OrganizationID"]
+fields = ['TR.CompanyName', 'TR.PriceClose', 'TR.CompanyRIC']
 
 '''where "search" would be the name of a company'''
 
-exp = "SCREEN(U(IN(Equity(active,public,private,primary))), Contains(TR.CommonName,%s), CURN=CAD)" %"ABB"
+exp = "SCREEN(U(IN(Equity(active,public,private,primary))), Contains(TR.CommonName,%s), CURN=CAD)" %"ABBN"
 
 
 df, e = ek.get_data(exp, fields)
