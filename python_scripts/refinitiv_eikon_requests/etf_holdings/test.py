@@ -11,9 +11,12 @@ df = pd.DataFrame({
 })
 
 
-sdate_for_year = "2018-01-01" #licence from UZH: 2017-01-01
+sdate_for_year = "2010-02-01" #licence from UZH: 2017-01-01
 
 df, e =ek.get_data(instruments = 'ASML.AS',
-                   fields = ['TR.FundAdjShrsHeld.InvestorPermID', 'TR.FundPortfolioName', 'TR.FundAdjShrsHeld', 'TR.FundHoldingsDate'],
+                   fields = ["TR.FundParentType(TheInvestorType=400)", "TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue", "TR.FundAddrCountry"],
                    parameters = {'EndNum':'300', "SDate": sdate_for_year})
 print(df)
+
+
+# "TR.FundParentType", "TR.FundInvestorType", "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue", "TR.FundAddrCountry"
