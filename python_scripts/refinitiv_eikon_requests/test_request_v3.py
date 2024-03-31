@@ -31,3 +31,19 @@ try:
         print(data)
 except Exception as e:
     print(f"An error occurred: {e}")
+
+
+#######################
+x='aapl'
+x=x.upper()
+test = ek.json_requests.send_json_request('SymbologySearch',{'symbols': [x], 'from': 'ticker', 'to': ['RIC'], 'bestMatchOnly': False})
+symbol=list()
+
+try:
+for key,value in test.items():
+value = value[0]
+for key1,value1 in value.items():
+symbol=value1[0]
+except:
+pass
+print( symbol)
