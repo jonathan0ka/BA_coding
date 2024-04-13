@@ -23,5 +23,5 @@ df, e =ek.get_data(instruments = 'NESN.S',
 df = df.sort_values("Fund Value Held (Adjusted)", ascending = False)
 df.columns = ["stock_RIC", "fund_type", "fund_name", "stock_value_held", "market_cap_fund", "country"]
 
-
+print(df)
 # "TR.FundParentType", "TR.FundInvestorType", "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue", "TR.FundAddrCountry",TR.FundAdjShrsHeld, TR.FdAdjSharesHeldValue
