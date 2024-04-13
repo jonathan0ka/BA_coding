@@ -5,23 +5,41 @@ import datetime
 
 ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
 
-df = pd.DataFrame({
-    'RIC': ['ASML.AS', 'NESN.S', 'SCMN.S', 'ASLO.PA'],
-    'name': ["ASML HOLDING NV", "NESTLE SA", "SWISSCOM AG", "ALSOM SA"]
-})
+# Define the date range
+start_date = '2024-01-01'
+end_date = '2024-03-01'
 
+# Import the CSV file containing the stock RICs
+ric_df = pd.read_csv('/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/constituents_stoxx_europe_600.csv')  # Make sure to provide the correct path
 
-sdate_for_year = "2024-01-01" #licence from UZH: 2017-01-01
+# Extract the RICs into a list
+ric_list = ric_df['Constituent RIC'].tolist()
 
-df, e =ek.get_data(instruments = 'NESN.S',
-                   fields = ["TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", 
-                             "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue(SortOrder=Descending)", 
-                             "TR.FundAddrCountry"],
-                   parameters = {'EndNum':'10', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
+# Initialize an empty DataFrame to aggregate the results
+aggregated_df = pd.DataFrame()
 
+# Generate the last business day of each month within the date range
+business_days = pd.date_range(start=start_date, end=end_date, freq="BM")
 
-df = df.sort_values("Fund Value Held (Adjusted)", ascending = False)
-df.columns = ["stock_RIC", "fund_type", "fund_name", "stock_value_held", "market_cap_fund", "country"]
+for specific_date in business_days:
+    sdate_for_year = specific_date.strftime("%Y-%m-%d")
+    print(sdate_for_year)
+    
+    # Assuming the fields are named correctly for the Eikon API
+    df, e = ek.get_data(instruments=ric_list,
+                        fields=["TR.FundInvestorType", "TR.FundPortfolioName", 
+                                "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue", 
+                                "TR.FundAddrCountry"],
+                        parameters={"date": sdate_for_year, "currency": "EUR", "scale": "6", "count": 10})
+    
+    df['date'] = sdate_for_year
+
+    # Append the retrieved dataframe to the aggregated dataframe
+    aggregated_df = pd.concat([aggregated_df, df], ignore_index=True)
+
+# Sort and rename the columns for the aggregated dataframe
+aggregated_df = aggregated_df.sort_values(by="TR.FdAdjSharesHeldValue", ascending=False)
+aggregated_df.columns = ["stock_RIC", "fund_type", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
 
 print(df)
 # "TR.FundParentType", "TR.FundInvestorType", "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue", "TR.FundAddrCountry",TR.FundAdjShrsHeld, TR.FdAdjSharesHeldValue
