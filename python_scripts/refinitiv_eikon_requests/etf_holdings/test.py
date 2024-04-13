@@ -27,11 +27,11 @@ for specific_date in business_days:
     print(sdate_for_year)
     
     # Assuming the fields are named correctly for the Eikon API
-    df, e = ek.get_data(instruments=ric_list,
-                        fields=["TR.FundInvestorType", "TR.FundPortfolioName", 
-                                "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue", 
-                                "TR.FundAddrCountry"],
-                        parameters={"date": sdate_for_year, "currency": "EUR", "scale": "6", "count": 10})
+    df, e =ek.get_data(instruments = ric_list,
+                       fields = ["TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", 
+                             "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue(SortOrder=Descending)", 
+                             "TR.FundAddrCountry"],
+                             parameters = {'EndNum':'100', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
     
     df['date'] = sdate_for_year
 
