@@ -43,6 +43,9 @@ for specific_date in business_days:
 aggregated_df.columns = ["stock_RIC", "fund_type", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
 print(aggregated_df)
 
+columns_to_keep = ["stock_RIC", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
+aggregated_df = aggregated_df[columns_to_keep]
+
 file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\etf_holdings_600_stocks.csv"
 aggregated_df.to_csv(file_path, index=False)
 

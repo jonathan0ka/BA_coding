@@ -2,6 +2,7 @@ import pandas as pd
 import eikon as ek
 import warnings
 
+##### refinitiv eikon api
 ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
 
 # Define the date range
