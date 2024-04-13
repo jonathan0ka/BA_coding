@@ -3,6 +3,19 @@ import eikon as ek
 # Set your Eikon API key
 ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
 
+fields = ['TR.CompanyName', 'TR.PriceClose', 'TR.CompanyRIC']
+
+'''where "search" would be the name of a company'''
+
+exp = "SCREEN(U(IN(Equity(active,public,private,primary))), Contains(TR.CommonName,%s), CURN=CAD)" %"ABBN"
+
+
+df, e = ek.get_data(exp, fields)
+print(df)
+
+
+##################### old code
+
 # # Use a company name to search for its ticker
 # company_name = "Sika"  # Example company name
 # data, err = ek.get_data(instruments=[f"R:{company_name}"], fields=['TR.CompanyName', 'TR.PriceClose', 'TR.Volume'])
@@ -31,15 +44,3 @@ ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
 #         print(data)
 # except Exception as e:
 #     print(f"An error occurred: {e}")
-
-
-#######################
-fields = ['TR.CompanyName', 'TR.PriceClose', 'TR.CompanyRIC']
-
-'''where "search" would be the name of a company'''
-
-exp = "SCREEN(U(IN(Equity(active,public,private,primary))), Contains(TR.CommonName,%s), CURN=CAD)" %"ABBN"
-
-
-df, e = ek.get_data(exp, fields)
-print(df)
