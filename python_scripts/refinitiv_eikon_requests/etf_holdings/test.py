@@ -27,7 +27,7 @@ for specific_date in business_days:
     print(sdate_for_year)
     
     # Assuming the fields are named correctly for the Eikon API
-    df, e =ek.get_data(instruments = ric_list,
+    df, e =ek.get_data(instruments = "NESN.N",
                        fields = ["TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", 
                              "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue(SortOrder=Descending)", 
                              "TR.FundAddrCountry"],
