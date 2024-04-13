@@ -13,10 +13,15 @@ df = pd.DataFrame({
 
 sdate_for_year = "2010-02-01" #licence from UZH: 2017-01-01
 
-df, e =ek.get_data(instruments = 'ASML.AS',
-                   fields = ["TR.FundParentType(TheInvestorType=400)", "TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue", "TR.FundAddrCountry"],
-                   parameters = {'EndNum':'300', "SDate": sdate_for_year})
-print(df)
+df, e =ek.get_data(instruments = 'NESN.S',
+                   fields = ["TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", 
+                             "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue(SortOrder=Descending)", 
+                             "TR.FundAddrCountry", "TR.FundInvOrientation(TheInvestorType=404)"],
+                   parameters = {'EndNum':'300', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
+
+
+df = df.sort_values("Fund Value Held (Adjusted)", ascending = False)
+df.columns = ["stock_RIC", "fund_type", "fund_name", "stock_value_held", "market_cap_fund", "country"]
 
 
 # "TR.FundParentType", "TR.FundInvestorType", "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue", "TR.FundAddrCountry",TR.FundAdjShrsHeld, TR.FdAdjSharesHeldValue
