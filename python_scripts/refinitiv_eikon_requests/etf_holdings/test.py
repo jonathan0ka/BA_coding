@@ -6,8 +6,8 @@ import datetime
 ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
 
 # Define the date range
-start_date = '2024-01-01'
-end_date = '2024-03-01'
+start_date = '2013-01-01'
+end_date = '2024-01-01'
 
 # Import the CSV file containing the stock RICs
 ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\constituents_stoxx_europe_600.csv')  # Make sure to provide the correct path
@@ -31,19 +31,17 @@ for specific_date in business_days:
                        fields = ["TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", 
                              "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue(SortOrder=Descending)", 
                              "TR.FundAddrCountry"],
-                             parameters = {'EndNum':'10', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
+                             parameters = {'EndNum':'100', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
     
     df['date'] = sdate_for_year
 
     # Append the retrieved dataframe to the aggregated dataframe
     aggregated_df = pd.concat([aggregated_df, df], ignore_index=True)
 
-# Sort and rename the columns for the aggregated dataframe
 #aggregated_df = aggregated_df.sort_values(by="TR.FdAdjSharesHeldValue", ascending=False)
-print(aggregated_df)
 aggregated_df.columns = ["stock_RIC", "fund_type", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
-print(aggregated_df)
 
+############################ export data frame
 columns_to_keep = ["stock_RIC", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
 aggregated_df = aggregated_df[columns_to_keep]
 
