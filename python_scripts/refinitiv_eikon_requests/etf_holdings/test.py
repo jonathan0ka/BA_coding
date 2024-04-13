@@ -16,8 +16,8 @@ sdate_for_year = "2024-01-01" #licence from UZH: 2017-01-01
 df, e =ek.get_data(instruments = 'NESN.S',
                    fields = ["TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", 
                              "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue(SortOrder=Descending)", 
-                             "TR.FundAddrCountry", "TR.FundInvOrientation(TheInvestorType=404)"],
-                   parameters = {'EndNum':'300', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
+                             "TR.FundAddrCountry"],
+                   parameters = {'EndNum':'10', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
 
 
 df = df.sort_values("Fund Value Held (Adjusted)", ascending = False)

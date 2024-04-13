@@ -195,6 +195,6 @@ for specific_date in business_days:
 # print(aggregated_df)
 
 
-file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\constituents_stoxx_europe_600"
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\constituents_stoxx_europe_600.csv"
 aggregated_df.to_csv(file_path, index=False)
 print(f"Data exported successfully")
