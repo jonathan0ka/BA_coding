@@ -27,11 +27,11 @@ for specific_date in business_days:
     print(sdate_for_year)
     
     # Assuming the fields are named correctly for the Eikon API
-    df, e =ek.get_data(instruments = "NESN.N",
+    df, e = ek.get_data(instruments = ric_list,
                        fields = ["TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", 
                              "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue(SortOrder=Descending)", 
                              "TR.FundAddrCountry"],
-                             parameters = {'EndNum':'100', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
+                             parameters = {'EndNum':'10', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
     
     df['date'] = sdate_for_year
 
@@ -40,6 +40,7 @@ for specific_date in business_days:
 
 # Sort and rename the columns for the aggregated dataframe
 #aggregated_df = aggregated_df.sort_values(by="TR.FdAdjSharesHeldValue", ascending=False)
+print(aggregated_df)
 aggregated_df.columns = ["stock_RIC", "fund_type", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
 print(aggregated_df)
 
