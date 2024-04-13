@@ -11,7 +11,7 @@ df = pd.DataFrame({
 })
 
 
-sdate_for_year = "2010-02-01" #licence from UZH: 2017-01-01
+sdate_for_year = "2024-01-01" #licence from UZH: 2017-01-01
 
 df, e =ek.get_data(instruments = 'NESN.S',
                    fields = ["TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", 
