@@ -10,10 +10,11 @@ start_date = '2024-01-01'
 end_date = '2024-03-01'
 
 # Import the CSV file containing the stock RICs
-ric_df = pd.read_csv('/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/constituents_stoxx_europe_600.csv')  # Make sure to provide the correct path
+ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\constituents_stoxx_europe_600.csv')  # Make sure to provide the correct path
 
 # Extract the RICs into a list
 ric_list = ric_df['Constituent RIC'].tolist()
+print(ric_list)
 
 # Initialize an empty DataFrame to aggregate the results
 aggregated_df = pd.DataFrame()
@@ -38,8 +39,12 @@ for specific_date in business_days:
     aggregated_df = pd.concat([aggregated_df, df], ignore_index=True)
 
 # Sort and rename the columns for the aggregated dataframe
-aggregated_df = aggregated_df.sort_values(by="TR.FdAdjSharesHeldValue", ascending=False)
+#aggregated_df = aggregated_df.sort_values(by="TR.FdAdjSharesHeldValue", ascending=False)
 aggregated_df.columns = ["stock_RIC", "fund_type", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
+print(aggregated_df)
 
-print(df)
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\etf_holdings_600_stocks.csv"
+aggregated_df.to_csv(file_path, index=False)
+
+
 # "TR.FundParentType", "TR.FundInvestorType", "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue", "TR.FundAddrCountry",TR.FundAdjShrsHeld, TR.FdAdjSharesHeldValue
