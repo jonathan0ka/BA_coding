@@ -50,3 +50,4 @@ aggregated_df.to_csv(file_path, index=False)
 
 
 # "TR.FundParentType", "TR.FundInvestorType", "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue", "TR.FundAddrCountry",TR.FundAdjShrsHeld, TR.FdAdjSharesHeldValue
+# TR.FundPctPortfolio
