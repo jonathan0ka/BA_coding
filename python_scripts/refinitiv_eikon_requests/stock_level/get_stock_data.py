@@ -20,11 +20,20 @@ print(ric_list)
 # Initialize an empty DataFrame to aggregate the results
 aggregated_df = pd.DataFrame()
 
-# Generate the last business day of each month within the date range
-business_days = pd.date_range(start=start_date, end=end_date, freq="BM")
+fields = ["TR.PriceClose.date",
+          "TR.PriceClose(Scale=0)", 
+          "TR.TotalReturn1D", 
+          "TR.Volume(Scale = 0)", 
+          "TR.TURNOVER", 
+          "TR.CompanyMarketCap", 
+          "TR.GrossProfit(Period=FY0)", 
+          "TR.PriceToBVPerShare", #book value / price
+          "TR.BIDPRICE", #last bidprice of previous day
+          "TR.ASKPRICE", #last askprice of previous day
+          "TR.MIDPRICE"] #last midprice of previous day
 
 aggregated_df, e = ek.get_data(instruments = ric_list,
-                    fields = ["TR.PriceClose.date","TR.PriceClose(Scale=0)", "TR.TotalReturn1D", "TR.Volume", "TR.CompanyMarketCap", "TR.TURNOVER"],
+                    fields = fields,
                     parameters = {"SDate": "2023-01-01", "EDate": "2024-01-01", "Frq":"D", "Curn":"EUR", "Scale":6})
 
 
