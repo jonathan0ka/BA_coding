@@ -30,7 +30,7 @@ fields = ["TR.PriceClose.date",
           "TR.PriceToBVPerShare", #book value / price
           "TR.BIDPRICE", #last bidprice of previous day
           "TR.ASKPRICE", #last askprice of previous day
-          "TR.MIDPRICE"] #last midprice of previous day
+          "TR.MIDPRICE"] #last midprice of previous day #returns NAs only
 
 aggregated_df, e = ek.get_data(instruments = ric_list,
                     fields = fields,
@@ -40,6 +40,9 @@ aggregated_df, e = ek.get_data(instruments = ric_list,
 #"TR.BVPSMean(Period=FY1)"
 print(aggregated_df)
 print(type(aggregated_df))
+
+# Convert to datetime
+aggregated_df['Date'] = pd.to_datetime(df['Date'])
 
 file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data.csv"
 aggregated_df.to_csv(file_path, index=False)
