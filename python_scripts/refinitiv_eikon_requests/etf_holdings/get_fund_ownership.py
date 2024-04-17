@@ -1,13 +1,10 @@
 import pandas as pd
 import eikon as ek
 import warnings
-import datetime
+from datetime import datetime
+from pandas import date_range
 
 ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
-
-# Define the date range
-start_date = '2013-01-01'
-end_date = '2024-01-01'
 
 # Import the CSV file containing the stock RICs
 ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\constituents_stoxx_europe_600.csv')  # Make sure to provide the correct path
@@ -16,13 +13,22 @@ ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\dataset
 ric_list = unique(ric_df['Constituent RIC'].tolist())
 print(ric_list)
 
+def get_first_of_months(start_date, end_date):
+    # Generate the date range
+    dates = date_range(start=start_date, end=end_date, freq='MS')
+    # Format the dates and return as list
+    return [date.strftime('%Y-%m-%d') for date in dates]
+
+# Define the date range
+start_date = '2023-01-01'
+end_date = '2024-01-01'
+first_days = get_first_of_months(start_date, end_date)
+
+########################################################################
 # Initialize an empty DataFrame to aggregate the results
 aggregated_df = pd.DataFrame()
 
-# Generate the last business day of each month within the date range
-business_days = pd.date_range(start=start_date, end=end_date, freq="BM")
-
-for specific_date in business_days:
+for specific_date in first_days:
     sdate_for_year = specific_date.strftime("%Y-%m-%d")
     print(sdate_for_year)
     
