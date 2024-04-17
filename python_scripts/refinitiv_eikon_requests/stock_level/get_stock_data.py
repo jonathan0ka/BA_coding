@@ -52,9 +52,9 @@ print(aggregated_df)
 print(type(aggregated_df))
 
 # Convert to datetime
-aggregated_df['Date'] = pd.to_datetime(df['Date'])
-aggregated_df = aggregated_df.normalize().date()
 aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date'])
+aggregated_df = aggregated_df.normalize().date()
+
 
 file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data.csv"
 aggregated_df.to_csv(file_path, index=False)
