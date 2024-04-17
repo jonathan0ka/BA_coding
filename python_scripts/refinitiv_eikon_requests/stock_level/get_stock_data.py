@@ -47,13 +47,11 @@ aggregated_df, e = ek.get_data(instruments = ric_list,
                     parameters = {"SDate": start_date, "EDate": end_date, "Frq":"D", "Curn":"EUR", "Scale":6})
 
 
-#"TR.BVPSMean(Period=FY1)"
-print(aggregated_df)
-print(type(aggregated_df))
+aggregated_df['TR.PriceClose.date'] = pd.to_datetime(aggregated_df['TR.PriceClose.date']).dt.date
 
-# Convert to datetime
-aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date'])
-aggregated_df = aggregated_df.normalize().date()
+# # Convert to datetime
+# aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date'])
+# aggregated_df = aggregated_df.normalize().date()
 
 
 file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data.csv"
