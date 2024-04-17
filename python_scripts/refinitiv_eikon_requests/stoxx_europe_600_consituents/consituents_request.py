@@ -7,8 +7,8 @@ import time
 ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 
 # Define the date range
-start_date = '2019-02-01'
-end_date = '2022-01-01'
+start_date = '2022-01-01'
+end_date = '2024-02-01'
 
 # Initialize an empty DataFrame to aggregate the results
 aggregated_df = pd.DataFrame()
@@ -41,6 +41,6 @@ for specific_date in business_days:
 columns_to_keep = ["Constituent RIC", "Constituent Name", "Date"]
 aggregated_df = aggregated_df[columns_to_keep]
 
-file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\constituents_stoxx_europe_600_v2.csv"
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\constituents_stoxx_europe_600_v4.csv"
 aggregated_df.to_csv(file_path, index=False)
 print(f"Data exported successfully")
