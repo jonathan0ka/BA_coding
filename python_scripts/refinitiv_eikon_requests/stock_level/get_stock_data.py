@@ -7,14 +7,14 @@ from datetime import datetime
 ek.set_app_key('4b3a2041ad65478b91d46404ba35a4f4d2413f6c')
 
 # Define the date range
-start_date = '2006-01-01'
+start_date = '2010-01-01'
 end_date = '2024-01-01'
 
 # Import the CSV file containing the stock RICs
-ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\constituents_stoxx_europe_600_merge.csv')
+ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv')
 
 # get unqiue stock_RIC
-ric_list = unique(ric_df['Constituent RIC'].tolist())
+ric_list = unique(ric_df['stock_RIC'].tolist())
 print(ric_list)
 
 # Initialize an empty DataFrame to aggregate the results

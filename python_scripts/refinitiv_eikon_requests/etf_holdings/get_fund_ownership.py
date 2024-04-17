@@ -20,7 +20,7 @@ def get_first_of_months(start_date, end_date):
     return [date.strftime('%Y-%m-%d') for date in dates]
 
 # Define the date range
-start_date = '2023-01-01'
+start_date = '2010-01-01'
 end_date = '2024-01-01'
 first_days = get_first_of_months(start_date, end_date)
 
