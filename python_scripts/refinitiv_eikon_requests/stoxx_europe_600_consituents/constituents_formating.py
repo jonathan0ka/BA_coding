@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Read data
-df = pd.read_csv('/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/index_constituents_data/constituents_stoxx_europe_600.csv')
+df = pd.read_csv('/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/index_constituents_data/constituents_stoxx_europe_600_merge.csv')
 
 # Create pivot table
 pivot_df = df.pivot_table(index='Date', columns='Constituent RIC', aggfunc='size', fill_value=0)

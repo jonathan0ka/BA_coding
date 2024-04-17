@@ -11,7 +11,7 @@ start_date = '2006-01-01'
 end_date = '2024-01-01'
 
 # Import the CSV file containing the stock RICs
-ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\constituents_stoxx_europe_600.csv')
+ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\constituents_stoxx_europe_600_merge.csv')
 
 # get unqiue stock_RIC
 ric_list = unique(ric_df['Constituent RIC'].tolist())
