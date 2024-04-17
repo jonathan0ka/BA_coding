@@ -10,10 +10,10 @@ start_date = '2013-01-01'
 end_date = '2024-01-01'
 
 # Import the CSV file containing the stock RICs
-ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\constituents_stoxx_europe_600.csv')  # Make sure to provide the correct path
+ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\constituents_stoxx_europe_600.csv')  # Make sure to provide the correct path
 
 # Extract the RICs into a list
-ric_list = ric_df['Constituent RIC'].tolist()
+ric_list = unique(ric_df['Constituent RIC'].tolist())
 print(ric_list)
 
 # Initialize an empty DataFrame to aggregate the results
@@ -28,10 +28,12 @@ for specific_date in business_days:
     
     # Assuming the fields are named correctly for the Eikon API
     df, e = ek.get_data(instruments = ric_list,
-                       fields = ["TR.FundInvestorType(TheInvestorType=404)", "TR.FundPortfolioName", 
-                             "TR.FundTotalEquityAssets", "TR.FdAdjSharesHeldValue(SortOrder=Descending)", 
-                             "TR.FundAddrCountry"],
-                             parameters = {'EndNum':'100', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
+                       fields = ["TR.FundInvestorType(TheInvestorType=404)",
+                                 "TR.FundPortfolioName",
+                                 "TR.FundTotalEquityAssets",
+                                 "TR.FdAdjSharesHeldValue(SortOrder=Descending)",
+                                 "TR.FundAddrCountry"],
+                                 parameters = {'EndNum':'100', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
     
     df['date'] = sdate_for_year
 
@@ -45,7 +47,7 @@ aggregated_df.columns = ["stock_RIC", "fund_type", "fund_name", "stock_value_hel
 columns_to_keep = ["stock_RIC", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
 aggregated_df = aggregated_df[columns_to_keep]
 
-file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\etf_holdings_600_stocks.csv"
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks.csv"
 aggregated_df.to_csv(file_path, index=False)
 
 
