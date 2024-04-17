@@ -7,7 +7,7 @@ from datetime import datetime
 ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 
 # Define the date range
-start_date = '2023-01-15'
+start_date = '2023-01-25'
 end_date = '2023-02-01'
 
 # Import the CSV file containing the stock RICs
