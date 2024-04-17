@@ -1,7 +1,6 @@
 import pandas as pd
 import eikon as ek
 import warnings
-import datetime
 from datetime import datetime
 
 ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
@@ -46,8 +45,8 @@ aggregated_df, e = ek.get_data(instruments = ric_list,
                     fields = fields,
                     parameters = {"SDate": start_date, "EDate": end_date, "Frq":"D", "Curn":"EUR", "Scale":6})
 
-
-aggregated_df['TR.PriceClose.date'] = pd.to_datetime(aggregated_df['TR.PriceClose.date']).dt.date
+print(aggregated_df)
+aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date']).dt.date
 
 # # Convert to datetime
 # aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date'])
