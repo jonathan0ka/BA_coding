@@ -58,7 +58,7 @@ for specific_date in first_days:
     aggregated_df = pd.concat([aggregated_df, df], ignore_index=True)
 
 #aggregated_df = aggregated_df.sort_values(by="TR.FdAdjSharesHeldValue", ascending=False)
-aggregated_df.columns = ["stock_RIC", "fund_type", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
+aggregated_df.columns = ["stock_RIC", "fund_type", "fund_name", "market_cap_fund", "stock_value_held", "country", "date"]
 
 ############################ export data frame
 columns_to_keep = ["stock_RIC", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
