@@ -13,16 +13,27 @@ ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\dataset
 ric_list = unique(ric_df['Constituent RIC'].tolist())
 print(ric_list)
 
-def get_first_of_months(start_date, end_date):
-    # Generate the date range
-    dates = date_range(start=start_date, end=end_date, freq='MS')
-    # Format the dates and return as list
-    return [date.strftime('%Y-%m-%d') for date in dates]
+# def get_first_of_months(start_date, end_date):
+#     # Generate the date range
+#     dates = date_range(start=start_date, end=end_date, freq='MS')
+#     # Format the dates and return as list
+#     return [date.strftime('%Y-%m-%d') for date in dates]
+
+
+# first_days = get_first_of_months(start_date, end_date)
+
+########################################################################
+def get_first_days(start_date, end_date):
+    # Create a date range from start date to end date with monthly frequency, starting at the first day of each month
+    date_range = pd.date_range(start=start_date, end=end_date, freq='MS')
+    
+    # Format dates as strings and return as a list
+    return [date.strftime('%Y-%m-%d') for date in date_range]
 
 # Define the date range
 start_date = '2010-01-01'
 end_date = '2024-01-01'
-first_days = get_first_of_months(start_date, end_date)
+first_days = get_first_days(start_date, end_date)
 
 ########################################################################
 # Initialize an empty DataFrame to aggregate the results
