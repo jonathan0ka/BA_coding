@@ -6,8 +6,8 @@ from datetime import datetime
 ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 
 # Define the date range
-start_date = '2023-01-25'
-end_date = '2023-02-01'
+start_date = '2010-01-01'
+end_date = '2024-01-01'
 
 # Import the CSV file containing the stock RICs
 ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv')
@@ -45,8 +45,7 @@ aggregated_df, e = ek.get_data(instruments = ric_list,
                     fields = fields,
                     parameters = {"SDate": start_date, "EDate": end_date, "Frq":"D", "Curn":"EUR", "Scale":6})
 
-print(aggregated_df)
-aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date']).dt.date
+#aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date']).dt.date
 
 # # Convert to datetime
 # aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date'])
@@ -55,4 +54,4 @@ aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date']).dt.date
 
 file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data.csv"
 aggregated_df.to_csv(file_path, index=False)
-# print(f"Data exported successfully")
+print(f"Data exported successfully")
