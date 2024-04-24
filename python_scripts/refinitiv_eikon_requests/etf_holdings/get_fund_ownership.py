@@ -6,6 +6,10 @@ from pandas import date_range
 
 ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 
+##############################################################
+# split stock_RIC into 10 equally large lists
+##############################################################
+
 # Import the CSV file containing the stock RICs
 ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv')  # Make sure to provide the correct path
 
@@ -13,6 +17,24 @@ ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\dataset
 ric_list = list(pd.unique(ric_df['stock_RIC'].tolist()))
 print(len(ric_list))
 
+# Number of desired lists
+num_lists = 10
+
+# Calculate the size of each list (assuming the list can be evenly divided)
+size_each_list = len(ric_list) // num_lists
+
+# Create a dictionary to hold the lists
+lists = {}
+
+# Split the list into 10 equally sized lists
+for i in range(num_lists):
+    start_index = i * size_each_list
+    # Adjust the end index to avoid index out of range
+    end_index = start_index + size_each_list if i < num_lists - 1 else len(ric_list)
+    lists[f'list_{i + 1}'] = names[start_index:end_index]
+
+########################################################################
+# dates
 ########################################################################
 def get_first_days(start_date, end_date):
     # Create a date range from start date to end date with monthly frequency, starting at the first day of each month
@@ -28,39 +50,61 @@ first_days = get_first_days(start_date, end_date)
 print(first_days)
 
 ########################################################################
-# Initialize an empty DataFrame to aggregate the results
-aggregated_df = pd.DataFrame()
+# initiate data frame
+########################################################################
+# empty DataFrame to aggregate the results
+col_names = ["stock_RIC",
+               "fund_type_parent",
+               "fund_type",
+               "fund_investment_type",
+               "fund_name",
+               "market_cap_fund",
+               "stock_value_held",
+               "percent_of_traded_shares",
+               "percent_of_fund_holdings",
+               "country",
+               "date"]
 
-for sdate_for_year in first_days:
-    print(sdate_for_year)
-    
-    # Assuming the fields are named correctly for the Eikon API
-    df, e = ek.get_data(instruments = ric_list,
-                   fields = ["TR.FundParentType",
-                             "TR.FundInvestorType",
-                             "TR.FundInvtStyleCode",
-                             #############################################################
-                             "TR.FundPortfolioName", 
-                             "TR.FundTotalEquityAssets", 
-                             "TR.FdAdjSharesHeldValue(SortOrder=Descending)",
-                             #############################################################
-                             "TR.FdAdjPctOfShrsOutHeld",
-                             "TR.FundPctPortfolio",
-                             "TR.FundAddrCountry",
-                             "TR.FdAdjSharesHeldValue.date"],
-                   parameters = {'EndNum':'1000', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
-    
-    df['date'] = sdate_for_year
-
-    # Append the retrieved dataframe to the aggregated dataframe
-    aggregated_df = pd.concat([aggregated_df, df], ignore_index=True)
-
-#aggregated_df = aggregated_df.sort_values(by="TR.FdAdjSharesHeldValue", ascending=False)
-#aggregated_df.columns = ["stock_RIC", "fund_type", "fund_name", "market_cap_fund", "stock_value_held", "country", "date"]
-
-############################ export data frame
-#columns_to_keep = ["stock_RIC", "fund_name", "stock_value_held", "market_cap_fund", "country", "date"]
-#aggregated_df = aggregated_df[columns_to_keep]
+aggregated_df = pd.DataFrame(columns = col_names)
 
 file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_test.csv"
 aggregated_df.to_csv(file_path, index=False)
+
+########################################################################
+# api request
+########################################################################
+for sdate_for_year in first_days:
+    print(f"Starting with data retrival for {sdate_for_year}")
+
+    df = pd.DataFrame()
+
+    for ric_sub_list in lists.keys:
+        
+        df_tmp, e = ek.get_data(instruments = ric_sub_list,
+                        fields = ["TR.FundParentType",
+                                  "TR.FundInvestorType",
+                                  "TR.FundInvtStyleCode",
+                                  ##############################################
+                                  "TR.FundPortfolioName", 
+                                  "TR.FundTotalEquityAssets", 
+                                  "TR.FdAdjSharesHeldValue(SortOrder=Descending)",
+                                  ##############################################
+                                  "TR.FdAdjPctOfShrsOutHeld",
+                                  "TR.FundPctPortfolio",
+                                  "TR.FundAddrCountry",
+                                  "TR.FdAdjSharesHeldValue.date"],
+                        parameters = {'EndNum':'1000', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
+    
+        df_tmp['date'] = sdate_for_year
+
+        # append data from all 10 lists to df
+        df = pd.concat([df, df_tmp], ignore_index=True)
+        df.columns = col_names
+
+    # Append DataFrame to an existing CSV file
+    df.to_csv(file_path, mode='a', header=True index=False)
+    print(f"Sucessfull retrival till {sdate_for_year}")
+
+
+# file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_test.csv"
+# aggregated_df.to_csv(file_path, index=False)
