@@ -13,7 +13,7 @@ ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 # Import the CSV file containing the stock RICs
 mac_path = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/index_constituents_data/formated_constituents_stoxx_europe_600.csv"
 windows_path = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv'
-ric_df = pd.read_csv(windows_path_path)
+ric_df = pd.read_csv(windows_path)
 
 
 # Extract the RICs into a list
@@ -55,7 +55,8 @@ first_days = get_first_days(start_date, end_date)
 # initiate data frame
 ########################################################################
 # empty DataFrame to aggregate the results
-col_names = ["stock_RIC",
+col_names = ["index",
+             "stock_RIC",
                "fund_type_parent",
                "fund_type",
                "fund_investment_type",
@@ -65,6 +66,7 @@ col_names = ["stock_RIC",
                "percent_of_traded_shares",
                "percent_of_fund_holdings",
                "country",
+               "filing_date"
                "date"]
 
 aggregated_df = pd.DataFrame(columns = col_names)
