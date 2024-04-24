@@ -67,8 +67,8 @@ aggregated_df, e = ek.get_data(instruments = ric_list,
 
 
 # # Convert to datetime
-aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date']).dt.date
-aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date'])
+#aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date']).dt.date
+#aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date'])
 
 
 end_time = time.time()
