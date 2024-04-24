@@ -50,24 +50,22 @@ fields = ["TR.PriceClose.date",
           "TR.ASKPRICE", #last askprice of previous day
           #"TR.ASKPRICE.date"
           ##########################
-          "TR.HeadquartersCountry",
+          #"TR.HeadquartersCountry",
           #"TR.IssuerRating",
-          "TR.WACC",
-          "TR.TotalEquity(Period=FY0)",
+          #"TR.WACC",
+          #"TR.TotalEquity(Period=FY0)",
           ##########################
-          "TR.TotalAssetsActual(Period=FY0)", #total assets - (total liabilties - prefered stock)
-          "TR.TotalLiabilities(Period=FY0)",
-          "TR.PreferredStockNet(Period=FY0)"
+          #"TR.TotalAssetsActual(Period=FY0)", #total assets - (total liabilties - prefered stock)
+          #"TR.TotalLiabilities(Period=FY0)",
+          #"TR.PreferredStockNet(Period=FY0)"
 
           ]
 
-# aggregated_df, e = ek.get_data(instruments = ric_list,
-#                     fields = fields,
-#                     parameters = {"SDate": start_date, "EDate": end_date, "Frq":"D", "Curn":"EUR", "Scale":6})
-
 aggregated_df, e = ek.get_data(instruments = ric_list,
                     fields = fields,
-                    parameters = {"SDate": start_date, "Curn":"EUR", "Scale":6})
+                    parameters = {"SDate": start_date, "EDate": end_date, "Frq":"D", "Curn":"EUR", "Scale":6})
+
+
 
 #aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date']).dt.date
 
