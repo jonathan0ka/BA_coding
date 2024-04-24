@@ -11,7 +11,10 @@ ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 ##############################################################
 
 # Import the CSV file containing the stock RICs
-ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv')  # Make sure to provide the correct path
+mac_path = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/index_constituents_data/formated_constituents_stoxx_europe_600.csv"
+windows_path = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv'
+ric_df = pd.read_csv(windows_path_path)
+
 
 # Extract the RICs into a list
 ric_list = list(pd.unique(ric_df['stock_RIC'].tolist()))
@@ -47,7 +50,6 @@ def get_first_days(start_date, end_date):
 start_date = '2010-01-01'
 end_date = '2010-01-01'
 first_days = get_first_days(start_date, end_date)
-print(first_days)
 
 ########################################################################
 # initiate data frame
@@ -78,9 +80,9 @@ for sdate_for_year in first_days:
 
     df = pd.DataFrame()
 
-    for ric_sub_list in lists.keys:
-        
-        df_tmp, e = ek.get_data(instruments = ric_sub_list,
+    for key, value in lists.items():
+        print(f"currently extracting data from {key}")
+        df_tmp, e = ek.get_data(instruments = value,
                         fields = ["TR.FundParentType",
                                   "TR.FundInvestorType",
                                   "TR.FundInvtStyleCode",
