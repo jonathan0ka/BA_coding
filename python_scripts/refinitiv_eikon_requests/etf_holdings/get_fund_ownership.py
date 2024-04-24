@@ -4,7 +4,7 @@ import warnings
 from datetime import datetime
 from pandas import date_range
 
-ek.set_app_key('80631b9534434526bb7b73ad26db914d4c2d9769')
+ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 
 # Import the CSV file containing the stock RICs
 ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv')  # Make sure to provide the correct path
