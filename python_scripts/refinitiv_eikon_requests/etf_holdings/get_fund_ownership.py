@@ -66,7 +66,7 @@ col_names = ["index",
                "percent_of_traded_shares",
                "percent_of_fund_holdings",
                "country",
-               "filing_date"
+               "filing_date",
                "date"]
 
 aggregated_df = pd.DataFrame(columns = col_names)
@@ -106,7 +106,7 @@ for sdate_for_year in first_days:
         df.columns = col_names
 
     # Append DataFrame to an existing CSV file
-    df.to_csv(file_path, mode='a', header=True, index=False)
+    df.to_csv(file_path, mode='a', header=False, index=False)
     print(f"Sucessfull retrival till {sdate_for_year}")
 
 
