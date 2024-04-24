@@ -42,7 +42,7 @@ first_days = get_first_days(start_date, end_date)
 # api request
 ########################################################################
 fields = [#"TR.PriceClose.date",
-          #"TR.PriceClose(Scale=0)",
+          "TR.PriceClose(Scale=0, Cur=EUR)",
           ########################## returns
           "TR.TotalReturn1D", # last trading day
           "TR.TotalReturn1Mo", # lag 30 days
@@ -54,34 +54,33 @@ fields = [#"TR.PriceClose.date",
           ########################## volume
           "TR.Volume(Scale = 0)",
           #"TR.Volume.date"
-          "TR.TURNOVER",
+          "TR.TURNOVER(Cur=EUR)",
           #"TR.TURNOVER.date",
           ##########################
-          "TR.CompanyMarketCap",
+          "TR.CompanyMarketCap(Cur=EUR)",
           #"TR.CompanyMarketCap.date",
           ##########################
           "TR.GrossProfit(Period=FY0)", 
           "TR.PriceToBVPerShare", #book value / price
-          "TR.BIDPRICE", #last bidprice of previous day
-          "TR.ASKPRICE", #last askprice of previous day
+          "TR.BIDPRICE(Cur=EUR)", #last bidprice of previous day
+          "TR.ASKPRICE(Cur=EUR)", #last askprice of previous day
           #"TR.ASKPRICE.date"
           ##########################
           "TR.HeadquartersCountry",
           #"TR.IssuerRating",
           "TR.WACC",
-          "TR.TotalEquity(Period=FY0)",
+          "TR.TotalEquity(Period=FY0, Cur=EUR)",
           ##########################
-          "TR.TotalAssetsActual(Period=FY0)", #total assets - (total liabilties - prefered stock)
-          "TR.TotalLiabilities(Period=FY0)",
-          "TR.PreferredStockNet(Period=FY0)"
-
+          "TR.TotalAssetsActual(Period=FY0, Cur=EUR)", #total assets - (total liabilties - prefered stock)
+          "TR.TotalLiabilities(Period=FY0), Cur=EUR",
+          "TR.PreferredStockNet(Period=FY0, Cur=EUR)"
           ]
 
 for sdate_for_month in first_days:
     print(sdate_for_month)
     df, e = ek.get_data(instruments = ric_list,
                     fields = fields,
-                    parameters = {"SDate": sdate_for_month, "Curn":"EUR", "Scale":6})
+                    parameters = {"SDate": sdate_for_month})
     
     df['date'] = sdate_for_month
 
