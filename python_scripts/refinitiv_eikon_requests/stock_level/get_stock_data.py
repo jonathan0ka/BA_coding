@@ -3,11 +3,16 @@ import eikon as ek
 import warnings
 from datetime import datetime
 
+import time
+# Record the start time
+start_time = time.time()
+
+
 ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 
 # Define the date range
-start_date = '2010-01-01'
-end_date = '2024-01-01'
+start_date = '2024-01-01'
+end_date = '2024-02-01'
 
 # Import the CSV file containing the stock RICs
 ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv')
@@ -15,19 +20,24 @@ ric_df = pd.read_csv('C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\dataset
 # get unqiue stock_RIC
 ric_df = ric_df.drop_duplicates(subset = "stock_RIC")
 ric_list = ric_df['stock_RIC'].tolist()
-print(ric_list)
+print(len(ric_list))
 
 # Initialize an empty DataFrame to aggregate the results
 aggregated_df = pd.DataFrame()
 
 fields = ["TR.PriceClose.date",
           "TR.PriceClose(Scale=0)",
-          ##########################
-          "TR.TotalReturn1D",
-          ##########################
+          ########################## returns
+          "TR.TotalReturn1D", # last trading day
+          "TR.TotalReturn1Mo", # lag 30 days
+          "TR.TotalReturn1Wk",
+          "TR.Volatility30D",
+          "TR.Volatility60D",
+          "TR.Volatility90D",
+          "TR.Volatility250D",
+          ########################## volume
           "TR.Volume(Scale = 0)",
           #"TR.Volume.date"
-          ##########################
           "TR.TURNOVER",
           #"TR.TURNOVER.date",
           ##########################
@@ -39,11 +49,25 @@ fields = ["TR.PriceClose.date",
           "TR.BIDPRICE", #last bidprice of previous day
           "TR.ASKPRICE", #last askprice of previous day
           #"TR.ASKPRICE.date"
+          ##########################
+          "TR.HeadquartersCountry",
+          #"TR.IssuerRating",
+          "TR.WACC",
+          "TR.TotalEquity(Period=FY0)",
+          ##########################
+          "TR.TotalAssetsActual(Period=FY0)", #total assets - (total liabilties - prefered stock)
+          "TR.TotalLiabilities(Period=FY0)",
+          "TR.PreferredStockNet(Period=FY0)"
+
           ]
+
+# aggregated_df, e = ek.get_data(instruments = ric_list,
+#                     fields = fields,
+#                     parameters = {"SDate": start_date, "EDate": end_date, "Frq":"D", "Curn":"EUR", "Scale":6})
 
 aggregated_df, e = ek.get_data(instruments = ric_list,
                     fields = fields,
-                    parameters = {"SDate": start_date, "EDate": end_date, "Frq":"D", "Curn":"EUR", "Scale":6})
+                    parameters = {"SDate": start_date, "Curn":"EUR", "Scale":6})
 
 #aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date']).dt.date
 
@@ -51,6 +75,9 @@ aggregated_df, e = ek.get_data(instruments = ric_list,
 # aggregated_df['Date'] = pd.to_datetime(aggregated_df['Date'])
 # aggregated_df = aggregated_df.normalize().date()
 
+end_time = time.time()
+elapsed_time = end_time - start_time
+print(f"Runtime of the script is {elapsed_time} seconds")
 
 file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data.csv"
 aggregated_df.to_csv(file_path, index=False)
