@@ -83,7 +83,7 @@ for sdate_for_month in first_days:
                     fields = fields,
                     parameters = {"SDate": sdate_for_month, "Curn":"EUR", "Scale":6})
     
-    df['date'] = sdate_for_year
+    df['date'] = sdate_for_month
 
     # Append the retrieved dataframe to the aggregated dataframe
     aggregated_df = pd.concat([aggregated_df, df], ignore_index=True)
