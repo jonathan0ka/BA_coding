@@ -31,7 +31,7 @@ for i in range(num_lists):
     start_index = i * size_each_list
     # Adjust the end index to avoid index out of range
     end_index = start_index + size_each_list if i < num_lists - 1 else len(ric_list)
-    lists[f'list_{i + 1}'] = names[start_index:end_index]
+    lists[f'list_{i + 1}'] = ric_list[start_index:end_index]
 
 ########################################################################
 # dates
@@ -102,7 +102,7 @@ for sdate_for_year in first_days:
         df.columns = col_names
 
     # Append DataFrame to an existing CSV file
-    df.to_csv(file_path, mode='a', header=True index=False)
+    df.to_csv(file_path, mode='a', header=True, index=False)
     print(f"Sucessfull retrival till {sdate_for_year}")
 
 
