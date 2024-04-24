@@ -41,8 +41,8 @@ first_days = get_first_days(start_date, end_date)
 ########################################################################
 # api request
 ########################################################################
-fields = ["TR.PriceClose.date",
-          "TR.PriceClose(Scale=0)",
+fields = [#"TR.PriceClose.date",
+          #"TR.PriceClose(Scale=0)",
           ########################## returns
           "TR.TotalReturn1D", # last trading day
           "TR.TotalReturn1Mo", # lag 30 days
@@ -87,6 +87,10 @@ for sdate_for_month in first_days:
 
     # Append the retrieved dataframe to the aggregated dataframe
     aggregated_df = pd.concat([aggregated_df, df], ignore_index=True)
+
+end_time = time.time()
+elapsed_time = end_time - start_time
+print(f"Runtime of the script is {elapsed_time} seconds")
 
 file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\m_stock_level_data.csv"
 aggregated_df.to_csv(file_path, index=False)
