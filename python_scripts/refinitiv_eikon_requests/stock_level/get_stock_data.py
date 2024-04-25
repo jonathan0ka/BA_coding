@@ -7,8 +7,9 @@ import time
 # Record the start time
 start_time = time.time()
 
-
-ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
+hsg_24 = "825c77d2d6cb4b3ba41d25d4c0b87c46325cd98c"
+uzh_2 = "80631b9534434526bb7b73ad26db914d4c2d9769"
+ek.set_app_key(hsg_24)
 
 ########################################################################
 # dates
@@ -25,7 +26,7 @@ def get_first_last_days(start_date_s, end_date_s):
 
     return list(zip(formatted_range_s, formatted_range_e))
 
-dates = get_first_last_days('2010-01-01', '2023-12-01')
+dates = get_first_last_days('2010-07-01', '2023-12-01')
 
 ########################################################################
 # get stock_RIC
@@ -57,10 +58,10 @@ col_names = ["stock_RIC",
              "ask_price"
             ]
 
-aggregated_df = pd.DataFrame(columns = col_names)
+#aggregated_df = pd.DataFrame(columns = col_names)
 
 file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data.csv"
-aggregated_df.to_csv(file_path, index=False)
+#aggregated_df.to_csv(file_path, index=False)
 
 ########################################################################
 # api request
@@ -103,17 +104,18 @@ fields = ["TR.PriceClose.date",
 
 for date_tuple in dates:
     print(f"Starting with data retrival for {date_tuple[0]} to {date_tuple[1]}")
-    aggregated_df, e = ek.get_data(instruments = ric_list,
-                                   fields = fields,
-                                   parameters = {"SDate": date_tuple[0], "EDate": date_tuple[1], "Frq":"D"})
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=FutureWarning)
+        aggregated_df, e = ek.get_data(instruments = ric_list,
+                                       fields = fields,
+                                       parameters = {"SDate": date_tuple[0], "EDate": date_tuple[1], "Frq":"D"})
     
-    # Append DataFrame to an existing CSV file
-    aggregated_df.columns = col_names
-    aggregated_df.to_csv(file_path, mode='a', header=False, index=False)
-    print(f"Sucessfull retrival till {sdate_for_year}")
+        # Append DataFrame to an existing CSV file
+        aggregated_df.columns = col_names
+        aggregated_df.to_csv(file_path, mode='a', header=False, index=False)
+    print(f"Sucessfull retrival till {date_tuple[1]}")
 
-
-print(f"Data exported successfully [Runtime: {time.time() - start_time} seconds]")
+print(f"Data exported successfully")
 
 
 # # Convert to datetime
