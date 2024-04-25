@@ -17,7 +17,10 @@ ric_df = pd.read_csv(windows_path)
 
 
 # Extract the RICs into a list
-ric_list = list(pd.unique(ric_df['stock_RIC'].tolist()))
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=FutureWarning)
+    
+    ric_list = list(pd.unique(ric_df['stock_RIC'].tolist()))
 print(len(ric_list))
 
 # Number of desired lists
@@ -47,16 +50,15 @@ def get_first_days(start_date, end_date):
     return [date.strftime('%Y-%m-%d') for date in date_range]
 
 # Define the date range
-start_date = '2010-01-01'
-end_date = '2010-01-01'
+start_date = '2011-03-01'
+end_date = '2024-01-01'
 first_days = get_first_days(start_date, end_date)
 
 ########################################################################
 # initiate data frame
 ########################################################################
 # empty DataFrame to aggregate the results
-col_names = ["index",
-             "stock_RIC",
+col_names = ["stock_RIC",
                "fund_type_parent",
                "fund_type",
                "fund_investment_type",
@@ -69,10 +71,10 @@ col_names = ["index",
                "filing_date",
                "date"]
 
-aggregated_df = pd.DataFrame(columns = col_names)
+##aggregated_df = pd.DataFrame(columns = col_names)
 
 file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_test.csv"
-aggregated_df.to_csv(file_path, index=False)
+##aggregated_df.to_csv(file_path, index=False)
 
 ########################################################################
 # api request
@@ -84,7 +86,10 @@ for sdate_for_year in first_days:
 
     for key, value in lists.items():
         print(f"currently extracting data from {key}")
-        df_tmp, e = ek.get_data(instruments = value,
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+    
+            df_tmp, e = ek.get_data(instruments = value,
                         fields = ["TR.FundParentType",
                                   "TR.FundInvestorType",
                                   "TR.FundInvtStyleCode",
@@ -101,13 +106,19 @@ for sdate_for_year in first_days:
     
         df_tmp['date'] = sdate_for_year
 
-        # append data from all 10 lists to df
-        df = pd.concat([df, df_tmp], ignore_index=True)
-        df.columns = col_names
-
-    # Append DataFrame to an existing CSV file
-    df.to_csv(file_path, mode='a', header=False, index=False)
-    print(f"Sucessfull retrival till {sdate_for_year}")
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+    
+            # append data from all 10 lists to df
+            df = pd.concat([df, df_tmp], ignore_index=True)
+        
+    df.columns = col_names
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=FutureWarning)
+    
+        # Append DataFrame to an existing CSV file
+        df.to_csv(file_path, mode='a', header=False, index=False)
+        print(f"Sucessfull retrival till {sdate_for_year}")
 
 
 # file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_test.csv"
