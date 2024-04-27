@@ -3,6 +3,7 @@ import eikon as ek
 import warnings
 from datetime import datetime
 from pandas import date_range
+from requests.exceptions import HTTPError, RequestException
 
 ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 
@@ -50,7 +51,7 @@ def get_first_days(start_date, end_date):
     return [date.strftime('%Y-%m-%d') for date in date_range]
 
 # Define the date range
-start_date = '2012-10-01'
+start_date = '2013-03-01'
 end_date = '2024-01-01'
 first_days = get_first_days(start_date, end_date)
 
@@ -103,6 +104,11 @@ def fetch_data(value, sdate_for_year, max_retries=3):
         except HTTPError as http_err:
             print(f"HTTP error occurred: {http_err} - Retrying... Attempt {attempts + 1}/{max_retries}")
             attempts += 1
+        
+        except RequestException as req_err:
+            
+
+
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             break  # Break on non-HTTP errors
