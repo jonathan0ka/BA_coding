@@ -7,6 +7,18 @@ from requests.exceptions import HTTPError, RequestException
 
 ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 
+##############################################################
+# global stop
+##############################################################
+stop_now = False
+stop_message = "Critical error: Conncetion Lost"
+
+def check_conditions(df_tmp):
+    global stop_now
+    # If the dataframe from the API call is None, set stop_now to True
+    if df_tmp is None:
+        stop_now = True
+        print(stop_message)
 
 
 ##############################################################
@@ -56,8 +68,6 @@ def get_first_days(start_date, end_date):
 start_date = '2013-04-01'
 end_date = '2024-01-01'
 first_days = get_first_days(start_date, end_date)
-
-
 
 ########################################################################
 # initiate data frame
@@ -120,6 +130,10 @@ def fetch_data(value, sdate_for_year, max_retries=3):
 # api call 
 ########################################################################
 for sdate_for_year in first_days:
+    if stop_now:
+        print(stop_message)
+        break
+
     print(f"Starting with data retrieval for {sdate_for_year}")
 
     df = pd.DataFrame()
@@ -130,9 +144,12 @@ for sdate_for_year in first_days:
             warnings.filterwarnings("ignore", category=FutureWarning)
 
             df_tmp = fetch_data(value, sdate_for_year)
-            if df_tmp == None:
-                print("None df")
+            check_conditions(df_tmp)  # Check if we should stop after this fetch
+
+            if stop_now:
+                print(stop_message)
                 break
+
             df_tmp['date'] = sdate_for_year
 
             df = pd.concat([df, df_tmp], ignore_index=True)
@@ -144,54 +161,3 @@ for sdate_for_year in first_days:
         # Append DataFrame to existing CSV file
         df.to_csv(file_path, mode='a', header=False, index=False)
         print(f"-----------------\nSuccessful retrieval till {sdate_for_year}\n-----------------")
-
-############################################################
-# for sdate_for_year in first_days:
-#     print(f"Starting with data retrival for {sdate_for_year}")
-
-#     df = pd.DataFrame()
-
-#     for key, value in lists.items():
-#         print(f"currently extracting data from {key}")
-#         with warnings.catch_warnings():
-#             warnings.filterwarnings("ignore", category=FutureWarning)
-    
-#             df_tmp, e = ek.get_data(instruments = value,
-#                         fields = ["TR.FundParentType",
-#                                   "TR.FundInvestorType",
-#                                   "TR.FundInvtStyleCode",
-#                                   ##############################################
-#                                   "TR.FundPortfolioName", 
-#                                   "TR.FundTotalEquityAssets", 
-#                                   "TR.FdAdjSharesHeldValue(SortOrder=Descending)",
-#                                   ##############################################
-#                                   "TR.FdAdjPctOfShrsOutHeld",
-#                                   "TR.FundPctPortfolio",
-#                                   "TR.FundAddrCountry",
-#                                   "TR.FdAdjSharesHeldValue.date"],
-#                         parameters = {'EndNum':'1000', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
-    
-#         df_tmp['date'] = sdate_for_year
-
-#         with warnings.catch_warnings():
-#             warnings.filterwarnings("ignore", category=FutureWarning)
-    
-#             # append data from all 10 lists to df
-#             df = pd.concat([df, df_tmp], ignore_index=True)
-
-    
-#     df.columns = col_names
-#     with warnings.catch_warnings():
-#         warnings.filterwarnings("ignore", category=FutureWarning)
-    
-#         # Append DataFrame to an existing CSV file
-#         df.to_csv(file_path, mode='a', header=False, index=False)
-#         print(f"Sucessfull retrival till {sdate_for_year}")
-
-#     old_sdate_for_year = sdate_for_year  
-
-# file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_test.csv"
-# aggregated_df.to_csv(file_path, index=False)
-
-
-######################
