@@ -77,49 +77,110 @@ file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_
 ##aggregated_df.to_csv(file_path, index=False)
 
 ########################################################################
-# api request
+# api call function
+########################################################################
+def fetch_data(value, sdate_for_year, max_retries=3):
+    attempts = 0
+    while attempts < max_retries:
+        try:
+            df_tmp, e = ek.get_data(
+                instruments=value,
+                fields=[
+                    "TR.FundParentType",
+                    "TR.FundInvestorType", 
+                    "TR.FundInvtStyleCode",
+                    "TR.FundPortfolioName", 
+                    "TR.FundTotalEquityAssets", 
+                    "TR.FdAdjSharesHeldValue(SortOrder=Descending)",
+                    "TR.FdAdjPctOfShrsOutHeld", 
+                    "TR.FundPctPortfolio", 
+                    "TR.FundAddrCountry", 
+                    "TR.FdAdjSharesHeldValue.date"
+                ],
+                parameters={'EndNum': '1000', "SDate": sdate_for_year, "Curn": "EUR", "Scale": 6}
+            )
+            return df_tmp  # Return data frame if the call is successful
+        except HTTPError as http_err:
+            print(f"HTTP error occurred: {http_err} - Retrying... Attempt {attempts + 1}/{max_retries}")
+            attempts += 1
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            break  # Break on non-HTTP errors
+    return None  # Return None if all retries fail
+
+########################################################################
+# api call 
 ########################################################################
 for sdate_for_year in first_days:
-    print(f"Starting with data retrival for {sdate_for_year}")
+    print(f"Starting with data retrieval for {sdate_for_year}")
 
     df = pd.DataFrame()
 
     for key, value in lists.items():
-        print(f"currently extracting data from {key}")
+        print(f"Currently extracting data from {key}")
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=FutureWarning)
-    
-            df_tmp, e = ek.get_data(instruments = value,
-                        fields = ["TR.FundParentType",
-                                  "TR.FundInvestorType",
-                                  "TR.FundInvtStyleCode",
-                                  ##############################################
-                                  "TR.FundPortfolioName", 
-                                  "TR.FundTotalEquityAssets", 
-                                  "TR.FdAdjSharesHeldValue(SortOrder=Descending)",
-                                  ##############################################
-                                  "TR.FdAdjPctOfShrsOutHeld",
-                                  "TR.FundPctPortfolio",
-                                  "TR.FundAddrCountry",
-                                  "TR.FdAdjSharesHeldValue.date"],
-                        parameters = {'EndNum':'1000', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
-    
-        df_tmp['date'] = sdate_for_year
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=FutureWarning)
-    
-            # append data from all 10 lists to df
+            df_tmp = fetch_data(value, sdate_for_year)
+            df_tmp['date'] = sdate_for_year
+
             df = pd.concat([df, df_tmp], ignore_index=True)
-        
+
     df.columns = col_names
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=FutureWarning)
     
-        # Append DataFrame to an existing CSV file
+        # Append DataFrame to existing CSV file
         df.to_csv(file_path, mode='a', header=False, index=False)
-        print(f"Sucessfull retrival till {sdate_for_year}")
+        print(f"-----------------\nSuccessful retrieval till {sdate_for_year}\n-----------------")
 
+############################################################
+# for sdate_for_year in first_days:
+#     print(f"Starting with data retrival for {sdate_for_year}")
+
+#     df = pd.DataFrame()
+
+#     for key, value in lists.items():
+#         print(f"currently extracting data from {key}")
+#         with warnings.catch_warnings():
+#             warnings.filterwarnings("ignore", category=FutureWarning)
+    
+#             df_tmp, e = ek.get_data(instruments = value,
+#                         fields = ["TR.FundParentType",
+#                                   "TR.FundInvestorType",
+#                                   "TR.FundInvtStyleCode",
+#                                   ##############################################
+#                                   "TR.FundPortfolioName", 
+#                                   "TR.FundTotalEquityAssets", 
+#                                   "TR.FdAdjSharesHeldValue(SortOrder=Descending)",
+#                                   ##############################################
+#                                   "TR.FdAdjPctOfShrsOutHeld",
+#                                   "TR.FundPctPortfolio",
+#                                   "TR.FundAddrCountry",
+#                                   "TR.FdAdjSharesHeldValue.date"],
+#                         parameters = {'EndNum':'1000', "SDate": sdate_for_year, "Curn":"EUR", "Scale":6})
+    
+#         df_tmp['date'] = sdate_for_year
+
+#         with warnings.catch_warnings():
+#             warnings.filterwarnings("ignore", category=FutureWarning)
+    
+#             # append data from all 10 lists to df
+#             df = pd.concat([df, df_tmp], ignore_index=True)
+
+    
+#     df.columns = col_names
+#     with warnings.catch_warnings():
+#         warnings.filterwarnings("ignore", category=FutureWarning)
+    
+#         # Append DataFrame to an existing CSV file
+#         df.to_csv(file_path, mode='a', header=False, index=False)
+#         print(f"Sucessfull retrival till {sdate_for_year}")
+
+#     old_sdate_for_year = sdate_for_year  
 
 # file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_test.csv"
 # aggregated_df.to_csv(file_path, index=False)
+
+
+######################
