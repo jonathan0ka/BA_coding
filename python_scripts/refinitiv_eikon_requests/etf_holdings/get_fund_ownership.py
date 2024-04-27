@@ -79,13 +79,6 @@ with open(file_path_date_tracking, mode='w', newline='') as file:
     
 def update_csv(file_path, new_value, row_index=1, column_index=0):
     data = []
-    with open(file_path, mode='r', newline='') as file:
-        csv_reader = csv.reader(file)
-        data = list(csv_reader)
-
-    # Check if the specified row and column index are within the bounds of the data
-    if row_index >= len(data) or column_index >= len(data[row_index]):
-        raise IndexError("The specified row or column index is out of range.")
 
     # Modify the value at the specified row and column
     data[row_index][column_index] = new_value
