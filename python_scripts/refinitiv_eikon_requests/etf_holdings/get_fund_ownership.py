@@ -7,6 +7,8 @@ from requests.exceptions import HTTPError, RequestException
 
 ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 
+
+
 ##############################################################
 # split stock_RIC into 10 equally large lists
 ##############################################################
@@ -51,9 +53,11 @@ def get_first_days(start_date, end_date):
     return [date.strftime('%Y-%m-%d') for date in date_range]
 
 # Define the date range
-start_date = '2013-03-01'
+start_date = '2013-04-01'
 end_date = '2024-01-01'
 first_days = get_first_days(start_date, end_date)
+
+
 
 ########################################################################
 # initiate data frame
@@ -111,10 +115,6 @@ def fetch_data(value, sdate_for_year, max_retries=3):
             print(f"An unexpected error occurred: {e}")
             break  # Break on non-HTTP, non-request errors to avoid infinite loop
     return None  # Return None if all retries fail
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-            break  # Break on non-HTTP errors
-    return None  # Return None if all retries fail
 
 ########################################################################
 # api call 
@@ -130,6 +130,9 @@ for sdate_for_year in first_days:
             warnings.filterwarnings("ignore", category=FutureWarning)
 
             df_tmp = fetch_data(value, sdate_for_year)
+            if df_tmp == None:
+                print("None df")
+                break
             df_tmp['date'] = sdate_for_year
 
             df = pd.concat([df, df_tmp], ignore_index=True)
