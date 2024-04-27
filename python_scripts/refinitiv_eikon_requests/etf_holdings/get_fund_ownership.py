@@ -50,7 +50,7 @@ def get_first_days(start_date, end_date):
     return [date.strftime('%Y-%m-%d') for date in date_range]
 
 # Define the date range
-start_date = '2012-06-01'
+start_date = '2012-09-01'
 end_date = '2024-01-01'
 first_days = get_first_days(start_date, end_date)
 
