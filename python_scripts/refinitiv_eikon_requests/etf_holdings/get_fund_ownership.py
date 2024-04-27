@@ -4,6 +4,7 @@ import warnings
 from datetime import datetime
 from pandas import date_range
 from requests.exceptions import HTTPError, RequestException
+import csv
 
 ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
 
@@ -64,9 +65,44 @@ def get_first_days(start_date, end_date):
     # Format dates as strings and return as a list
     return [date.strftime('%Y-%m-%d') for date in date_range]
 
-# Define the date range
-start_date = '2013-05-01'
-end_date = '2024-01-01'
+########################################################################
+# dates storage
+########################################################################
+file_path_date_tracking = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\date_tracking.csv'
+
+with open(file_path_date_tracking, mode='w', newline='') as file:
+    csv_writer = csv.writer(file)
+    headers = ["start_date", "end_date"]
+    csv_writer.writerow(headers)
+    csv_writer.writerow(['2013-05-01', '2024-01-01'])
+####################### ####################### ####################### 
+    
+def update_csv(file_path, new_value, row_index=1, column_index=0):
+    data = []
+    with open(file_path, mode='r', newline='') as file:
+        csv_reader = csv.reader(file)
+        data = list(csv_reader)
+
+    # Check if the specified row and column index are within the bounds of the data
+    if row_index >= len(data) or column_index >= len(data[row_index]):
+        raise IndexError("The specified row or column index is out of range.")
+
+    # Modify the value at the specified row and column
+    data[row_index][column_index] = new_value
+
+    # Write the data back to the CSV file
+    with open(file_path, mode='w', newline='') as file:
+        csv_writer = csv.writer(file)
+        csv_writer.writerows(data)
+    print("date_tracking.csv has been successfully updated")
+    
+with open(file_path_date_tracking, mode='r', newline='') as file:
+    csv_reader = csv.reader(file)
+    next(csv_reader)
+    row = next(csv_reader)
+    start_date = row[0]
+    end_date = row[1]
+
 first_days = get_first_days(start_date, end_date)
 
 ########################################################################
@@ -130,7 +166,7 @@ def fetch_data(value, sdate_for_year, max_retries=3):
 # api call 
 ########################################################################
 for sdate_for_year in first_days:
-
+    update_csv(file_path, new_value)
     print(f"Starting with data retrieval for {sdate_for_year}")
 
     df = pd.DataFrame()
