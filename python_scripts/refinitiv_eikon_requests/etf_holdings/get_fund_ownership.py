@@ -65,7 +65,7 @@ def get_first_days(start_date, end_date):
     return [date.strftime('%Y-%m-%d') for date in date_range]
 
 # Define the date range
-start_date = '2013-04-01'
+start_date = '2013-05-01'
 end_date = '2024-01-01'
 first_days = get_first_days(start_date, end_date)
 
@@ -130,9 +130,6 @@ def fetch_data(value, sdate_for_year, max_retries=3):
 # api call 
 ########################################################################
 for sdate_for_year in first_days:
-    if stop_now:
-        print(stop_message)
-        break
 
     print(f"Starting with data retrieval for {sdate_for_year}")
 
@@ -144,15 +141,18 @@ for sdate_for_year in first_days:
             warnings.filterwarnings("ignore", category=FutureWarning)
 
             df_tmp = fetch_data(value, sdate_for_year)
-            check_conditions(df_tmp)  # Check if we should stop after this fetch
 
+            # Check if we should stop after this fetch
+            check_conditions(df_tmp)  
             if stop_now:
-                print(stop_message)
                 break
 
             df_tmp['date'] = sdate_for_year
-
             df = pd.concat([df, df_tmp], ignore_index=True)
+
+    if stop_now:
+        print(stop_message)
+        break
 
     df.columns = col_names
     with warnings.catch_warnings():
