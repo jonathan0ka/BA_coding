@@ -34,7 +34,7 @@ def fetch_data(value, sdate_for_year, max_retries=2):
     attempts = 0
     while attempts < max_retries:
         try:
-            return ek.get_data(
+            df_tmp, e = ek.get_data(
                 instruments=value,
                 fields=[
                     "TR.FundParentType", "TR.FundInvestorType", "TR.FundInvtStyleCode",
@@ -43,6 +43,7 @@ def fetch_data(value, sdate_for_year, max_retries=2):
                 ],
                 parameters={'EndNum': '1000', "SDate": sdate_for_year, "Curn": "EUR", "Scale": 6}
             )
+            return df_tmp
         except (HTTPError, RequestException) as e:
             print(f"{e.__class__.__name__} occurred: {e} - Retrying... Attempt {attempts + 1}/{max_retries}")
             attempts += 1
@@ -60,7 +61,7 @@ def main():
     start_date, end_date = read_dates(file_path_date_tracking)
     first_days = get_first_days(start_date, end_date)
 
-    file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_test.csv"
+    file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_2014.csv"
     col_names = ["stock_RIC", "fund_type_parent", "fund_type", "fund_investment_type", "fund_name",
                  "market_cap_fund", "stock_value_held", "percent_of_traded_shares", "percent_of_fund_holdings",
                  "country", "filing_date", "date"]

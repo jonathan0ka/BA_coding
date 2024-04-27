@@ -70,14 +70,14 @@ def get_first_days(start_date, end_date):
 ########################################################################
 file_path_date_tracking = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\date_tracking.csv'
 
-with open(file_path_date_tracking, mode='w', newline='') as file:
-    csv_writer = csv.writer(file)
-    headers = ["start_date", "end_date"]
-    csv_writer.writerow(headers)
-    csv_writer.writerow(['2013-05-01', '2024-01-01'])
+# with open(file_path_date_tracking, mode='w', newline='') as file:
+#     csv_writer = csv.writer(file)
+#     headers = ["start_date", "end_date"]
+#     csv_writer.writerow(headers)
+#     csv_writer.writerow(['2013-05-01', '2024-01-01'])
 ####################### ####################### ####################### 
     
-def update_csv(file_path, new_value, row_index=1, column_index=0):
+def update_csv(file_path, new_value, row_index=0, column_index=0):
     data = []
 
     # Modify the value at the specified row and column
@@ -115,10 +115,10 @@ col_names = ["stock_RIC",
                "filing_date",
                "date"]                                                                                                                                                   
 
-##aggregated_df = pd.DataFrame(columns = col_names)
+aggregated_df = pd.DataFrame(columns = col_names)
 
-file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_test.csv"
-##aggregated_df.to_csv(file_path, index=False)
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_2014.csv"
+aggregated_df.to_csv(file_path, index=False)
 
 ########################################################################
 # api call function
