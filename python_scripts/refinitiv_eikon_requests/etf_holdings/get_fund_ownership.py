@@ -104,11 +104,13 @@ def fetch_data(value, sdate_for_year, max_retries=3):
         except HTTPError as http_err:
             print(f"HTTP error occurred: {http_err} - Retrying... Attempt {attempts + 1}/{max_retries}")
             attempts += 1
-        
         except RequestException as req_err:
-            
-
-
+            print(f"Request error occurred: {req_err} - Retrying... Attempt {attempts + 1}/{max_retries}")
+            attempts += 1
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            break  # Break on non-HTTP, non-request errors to avoid infinite loop
+    return None  # Return None if all retries fail
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             break  # Break on non-HTTP errors
