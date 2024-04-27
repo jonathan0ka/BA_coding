@@ -6,7 +6,7 @@ from pandas import date_range
 from requests.exceptions import HTTPError, RequestException
 import csv
 
-ek.set_app_key('9aceb0f0b92f4b5cab82266c64eee1e83614934e')
+ek.set_app_key('80631b9534434526bb7b73ad26db914d4c2d9769')
 
 ##############################################################
 # global stop
@@ -130,7 +130,7 @@ file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_
 ########################################################################
 # api call function
 ########################################################################
-def fetch_data(value, sdate_for_year, max_retries=3):
+def fetch_data(value, sdate_for_year, max_retries=2):
     attempts = 0
     while attempts < max_retries:
         try:
@@ -166,7 +166,7 @@ def fetch_data(value, sdate_for_year, max_retries=3):
 # api call 
 ########################################################################
 for sdate_for_year in first_days:
-    update_csv(file_path, new_value)
+    update_csv(file_path, sdate_for_year)
     print(f"Starting with data retrieval for {sdate_for_year}")
 
     df = pd.DataFrame()
