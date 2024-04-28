@@ -74,7 +74,7 @@ file_path_date_tracking = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\da
 #     csv_writer = csv.writer(file)
 #     headers = ["start_date", "end_date"]
 #     csv_writer.writerow(headers)
-#     csv_writer.writerow(['2013-05-01', '2024-01-01'])
+#     csv_writer.writerow(['2014-07-01', '2024-01-01'])
 ####################### ####################### ####################### 
     
 def update_csv(file_path, new_value, row_index=0, column_index=0):
@@ -115,10 +115,10 @@ col_names = ["stock_RIC",
                "filing_date",
                "date"]                                                                                                                                                   
 
-aggregated_df = pd.DataFrame(columns = col_names)
+#aggregated_df = pd.DataFrame(columns = col_names)
 
-file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_2014.csv"
-aggregated_df.to_csv(file_path, index=False)
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_2016_12.csv"
+#aggregated_df.to_csv(file_path, index=False)
 
 ########################################################################
 # api call function
@@ -159,7 +159,7 @@ def fetch_data(value, sdate_for_year, max_retries=2):
 # api call 
 ########################################################################
 for sdate_for_year in first_days:
-    update_csv(file_path, sdate_for_year)
+    #update_csv(file_path, sdate_for_year)
     print(f"Starting with data retrieval for {sdate_for_year}")
 
     df = pd.DataFrame()
