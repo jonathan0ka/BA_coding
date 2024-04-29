@@ -6,7 +6,7 @@ from pandas import date_range
 from requests.exceptions import HTTPError, RequestException, Timeout
 import csv
 
-ek.set_app_key('5155bd71adaa413995b59c55fd31aef79314743a')
+ek.set_app_key('80631b9534434526bb7b73ad26db914d4c2d9769')
 
 ##############################################################
 # global stop
@@ -28,7 +28,7 @@ def check_conditions(df_tmp):
 
 # Import the CSV file containing the stock RICs
 mac_path = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/index_constituents_data/formated_constituents_stoxx_europe_600.csv"
-windows_path = 'D:\\30_One_Drive_Jonathan\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv'
+windows_path = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv'
 ric_df = pd.read_csv(windows_path)
 
 
@@ -119,7 +119,7 @@ col_names = ["stock_RIC",
 
 #aggregated_df = pd.DataFrame(columns = col_names)
 
-file_path = "D:\\30_One_Drive_Jonathan\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_2021_01.csv"
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_2021_01.csv"
 #aggregated_df.to_csv(file_path, index=False)
 
 ########################################################################
