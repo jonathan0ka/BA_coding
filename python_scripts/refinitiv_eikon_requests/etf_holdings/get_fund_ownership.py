@@ -6,7 +6,7 @@ from pandas import date_range
 from requests.exceptions import HTTPError, RequestException
 import csv
 
-ek.set_app_key('80631b9534434526bb7b73ad26db914d4c2d9769')
+ek.set_app_key('940ef42d301045f88d57ab197ddd79e4e45f93f0')
 
 ##############################################################
 # global stop
