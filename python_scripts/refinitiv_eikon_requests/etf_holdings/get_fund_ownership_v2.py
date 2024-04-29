@@ -6,7 +6,7 @@ from pandas import date_range
 from requests.exceptions import HTTPError, RequestException, Timeout
 import csv
 
-ek.set_app_key('940ef42d301045f88d57ab197ddd79e4e45f93f0')
+ek.set_app_key('5155bd71adaa413995b59c55fd31aef79314743a')
 
 ##############################################################
 # global stop
@@ -28,7 +28,7 @@ def check_conditions(df_tmp):
 
 # Import the CSV file containing the stock RICs
 mac_path = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/index_constituents_data/formated_constituents_stoxx_europe_600.csv"
-windows_path = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv'
+windows_path = 'D:\\30_One_Drive_Jonathan\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv'
 ric_df = pd.read_csv(windows_path)
 
 
@@ -68,7 +68,7 @@ def get_first_days(start_date, end_date):
 ########################################################################
 # dates storage
 ########################################################################
-file_path_date_tracking = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\date_tracking.csv'
+#file_path_date_tracking = 'D:\\30_One_Drive_Jonathan\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\date_tracking.csv'
 
 # with open(file_path_date_tracking, mode='w', newline='') as file:
 #     csv_writer = csv.writer(file)
@@ -77,25 +77,27 @@ file_path_date_tracking = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\da
 #     csv_writer.writerow(['2014-07-01', '2024-01-01'])
 ####################### ####################### ####################### 
     
-def update_csv(file_path, new_value, row_index=0, column_index=0):
-    data = []
+# def update_csv(file_path, new_value, row_index=0, column_index=0):
+#     data = []
 
-    # Modify the value at the specified row and column
-    data[row_index][column_index] = new_value
+#     # Modify the value at the specified row and column
+#     data[row_index][column_index] = new_value
 
-    # Write the data back to the CSV file
-    with open(file_path, mode='w', newline='') as file:
-        csv_writer = csv.writer(file)
-        csv_writer.writerows(data)
-    print("date_tracking.csv has been successfully updated")
+#     # Write the data back to the CSV file
+#     with open(file_path, mode='w', newline='') as file:
+#         csv_writer = csv.writer(file)
+#         csv_writer.writerows(data)
+#     print("date_tracking.csv has been successfully updated")
     
-with open(file_path_date_tracking, mode='r', newline='') as file:
-    csv_reader = csv.reader(file)
-    next(csv_reader)
-    row = next(csv_reader)
-    start_date = row[0]
-    end_date = row[1]
+# with open(file_path_date_tracking, mode='r', newline='') as file:
+#     csv_reader = csv.reader(file)
+#     next(csv_reader)
+#     row = next(csv_reader)
+#     start_date = row[0]
+#     end_date = row[1]
 
+start_date = "2022-12-01" #
+end_date = "2022-12-01"
 first_days = get_first_days(start_date, end_date)
 
 ########################################################################
@@ -117,13 +119,13 @@ col_names = ["stock_RIC",
 
 #aggregated_df = pd.DataFrame(columns = col_names)
 
-file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_2016_12.csv"
+file_path = "D:\\30_One_Drive_Jonathan\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_2021_01.csv"
 #aggregated_df.to_csv(file_path, index=False)
 
 ########################################################################
 # api call function
 ########################################################################
-def fetch_data(value, sdate_for_year, max_retries=2):
+def fetch_data(value, sdate_for_year, max_retries=3):
     attempts = 0
     while attempts < max_retries:
         try:
@@ -144,7 +146,6 @@ def fetch_data(value, sdate_for_year, max_retries=2):
                 parameters={'EndNum': '1000', "SDate": sdate_for_year, "Curn": "EUR", "Scale": 6}
             )
             return df_tmp  # Return data frame if the call is successful
-        
         except Timeout as timeout_err:
             print(f"Timeout occurred: {timeout_err} - Retrying... Attempt {attempts + 1}/{max_retries}")
             attempts += 1
@@ -156,7 +157,7 @@ def fetch_data(value, sdate_for_year, max_retries=2):
             attempts += 1
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
-            break  # Break on non-HTTP, non-request errors to avoid infinite loop
+            attempts += 1
     return None  # Return None if all retries fail
 
 ########################################################################
