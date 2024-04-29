@@ -9,6 +9,8 @@ ek.set_app_key('80631b9534434526bb7b73ad26db914d4c2d9769')
 # Global stop variables
 stop_now = False
 stop_message = "Critical error: Connection Lost"
+start_date = "2019-01-01"
+end_date = "2024-01-01"
 
 def check_conditions(df_tmp):
     global stop_now
@@ -21,31 +23,20 @@ def split_into_lists(ric_df, num_lists=10):
     print(f"Total unique RICs: {len(ric_list)}")
     return {f'list_{i+1}': ric_list[i::num_lists] for i in range(num_lists)}
 
-def read_dates(csv_path):
-    with open(csv_path, mode='r', newline='') as file:
-        csv_reader = csv.reader(file)
-        next(csv_reader)  # Skip header
-        return next(csv_reader)  # Read the first row of dates
-
-def update_start_date(csv_path, new_start_date):
-    try:
-        with open(csv_path, mode='r', newline='') as file:
-            csv_reader = csv.reader(file)
-            data = list(csv_reader)
-
-        if len(data) > 1:  # Ensure there is at least one data row
-            data[1][0] = new_start_date  # Update start_date
-
-        with open(csv_path, mode='w', newline='') as file:
-            csv_writer = csv.writer(file)
-            csv_writer.writerows(data)
-        print("Start date has been updated in the CSV file")
-    except Exception as e:
-        print(f"An error occurred while updating the CSV file: {e}")
-
-
 def get_first_days(start_date, end_date):
     return pd.date_range(start=start_date, end=end_date, freq='MS').strftime('%Y-%m-%d').tolist()
+
+def split_dates_into_lists(num_lists=10):
+    
+    print(f"Total unique RICs: {len(ric_list)}")
+    return {f'list_{i+1}': ric_list[i::num_lists] for i in range(num_lists)}
+    
+
+
+
+
+
+
 
 def fetch_data(value, sdate_for_year, max_retries=2):
     attempts = 0
@@ -74,10 +65,7 @@ def fetch_data(value, sdate_for_year, max_retries=2):
 def main():
     windows_path = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv'
     ric_df = pd.read_csv(windows_path)
-
     lists = split_into_lists(ric_df)
-    file_path_date_tracking = 'C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\date_tracking.csv'
-    start_date, end_date = read_dates(file_path_date_tracking)
     first_days = get_first_days(start_date, end_date)
 
     file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_test.csv"
@@ -86,7 +74,6 @@ def main():
                  "country", "filing_date", "date"]
 
     for sdate_for_year in first_days:
-        update_start_date(file_path_date_tracking, sdate_for_year)  # Update the start_date in the CSV
         if stop_now:
             print(stop_message)
             break
@@ -115,4 +102,28 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# def read_dates(csv_path):
+#     with open(csv_path, mode='r', newline='') as file:
+#         csv_reader = csv.reader(file)
+#         next(csv_reader)  # Skip header
+#         return next(csv_reader)  # Read the first row of dates
+
+# def update_start_date(csv_path, new_start_date):
+#     try:
+#         with open(csv_path, mode='r', newline='') as file:
+#             csv_reader = csv.reader(file)
+#             data = list(csv_reader)
+
+#         if len(data) > 1:  # Ensure there is at least one data row
+#             data[1][0] = new_start_date  # Update start_date
+
+#         with open(csv_path, mode='w', newline='') as file:
+#             csv_writer = csv.writer(file)
+#             csv_writer.writerows(data)
+#         print("Start date has been updated in the CSV file")
+#     except Exception as e:
+#         print(f"An error occurred while updating the CSV file: {e}")
+
 
