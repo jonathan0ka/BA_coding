@@ -1,0 +1,114 @@
+---
+title: "Variance Ratio on ETF Ownership"
+author: "Jonathan Alexander Zeh"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    theme: cerulean
+    mainfont: Monaco
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+library(tidyverse)
+library(ggplot2)
+library(caTools)
+library(dplyr)
+library(purrr)
+library(knitr)
+library(readxl)
+```
+
+
+# data import
+```{r}
+df <- read.csv("/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/variable_data/quarterly_panel_v1.csv")
+
+df$date <- as.Date(df$date)
+```
+
+
+## first plot
+```{r}
+ggplot(df %>% filter(stock_RIC == "ZURN.S"))
+geom_line(aes(x=date, y= ETF_ownership))
+
+
+basic_plot <- function(stock_RIC) {
+  df_tmp <- df[, c("date", "stock_RIC", "ETF_ownership", "Variance_Ratio")] %>% 
+    filter(stock_RIC == stock_RIC)
+  df_tmp <- na.omit(df_tmp)
+  
+  par(mfrow = c(2, 1), mar = c(2, 0, 2, 0))
+  plot(x = as.Date(df_tmp$date), y = df_tmp$ETF_ownership)
+  plot(x = as.Date(df_tmp$date), y = df_tmp$Variance_Ratio)
+  
+  
+}
+
+basic_plot("ZURN.S")
+basic_plot("ASML.S")
+```
+
+#first regression
+```{r}
+library(plm)
+
+dates_to_exclude <- as.Date(c("2015-04-01", "2015-07-01", "2015-10-01"))
+
+data <- df %>%
+  filter(!date %in% dates_to_exclude) %>%
+  filter(Variance_Ratio < 3 & ETF_ownership < 0.25) %>%
+  select(date, stock_RIC, ETF_ownership, Variance_Ratio)
+
+pdata <- pdata.frame(data , index = c("stock_RIC", "date"))
+
+mod_1 <- lm(Variance_Ratio ~ ETF_ownership, data = df)
+summary(mod_1)
+
+
+
+
+
+data_abs <- df %>%
+  filter(!date %in% dates_to_exclude) %>%
+  filter(abs_Variance_Ratio < 3 & ETF_ownership < 0.25) %>%
+  select(date, stock_RIC, ETF_ownership, abs_Variance_Ratio)
+
+pdata <- pdata.frame(data_abs, index = c("stock_RIC", "date"))
+
+# Fit a fixed effects model
+fe_model <- plm(abs_Variance_Ratio ~ ETF_ownership, data = pdata, model = "within")
+
+summary(fe_model)
+
+
+
+```
+## plot all data points
+```{r}
+plot(x = df$ETF_ownership, y = df$abs_Variance_Ratio, col = rgb(0, 0, 0, 0.012),
+     xlim = c(0, 0.3), ylim = c(0, 3),
+     main = "ETF Ownership against Variance Ratio",
+     ylab = "abs(Variance Ratio)",
+     xlab = "ETF Ownership")
+
+```
+
+### another plot
+```{r}
+
+
+
+
+unique_ric <- as.vector(unique(df$stock_RIC))
+
+
+
+ggplot(df %>% filter(stock_RIC %in% unique_ric[4])) +
+  geom_point(aes(x=ETF_ownership, y = abs_Variance_Ratio, col = stock_RIC)) +
+  guides(color = "none")
+```
+
