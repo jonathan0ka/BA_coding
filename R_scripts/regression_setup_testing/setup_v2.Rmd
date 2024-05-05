@@ -1,0 +1,22 @@
+---
+title: "ETF Ownership"
+author: "Jonathan Alexander Zeh"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    theme: cerulean
+    mainfont: Monaco
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+library(tidyverse)
+library(ggplot2)
+library(caTools)
+library(dplyr)
+library(purrr)
+library(knitr)
+library(readxl)
+```
