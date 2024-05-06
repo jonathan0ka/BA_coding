@@ -26,7 +26,7 @@ def get_first_last_days(start_date_s, end_date_s):
 
     return list(zip(formatted_range_s, formatted_range_e))
 
-dates = get_first_last_days("2021-10-01", '2023-12-01')
+dates = get_first_last_days("2014-09-01", '2014-09-30')
 
 ########################################################################
 # get stock_RIC

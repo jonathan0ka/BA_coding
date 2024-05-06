@@ -20,3 +20,63 @@ library(purrr)
 library(knitr)
 library(readxl)
 ```
+
+## data import
+```{r}
+df_raw = read_csv("/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/variable_data/monthly_panel_v1.csv")
+
+df_raw$date <- as.Date(df_raw$date)
+
+dates_to_exclude <- as.Date(c("2015-04-01", "2015-07-01", "2015-10-01"))
+
+df <- df_raw %>%
+  filter(!date %in% dates_to_exclude) %>%
+  select(date, stock_RIC, ETF_ownership, FUND_ownership, monthly_std_dev, market_cap, price, return1Mo)
+```
+
+## plots
+```{r}
+plot(x = df$ETF_ownership, y = df$monthly_std_dev, col = rgb(0, 0, 0, 0.012),
+     xlim = c(0, 0.2), ylim = c(0, 10),
+     main = "ETF Ownership against Monthly Standard Deviation",
+     ylab = "Monthly Standard Deviation",
+     xlab = "ETF Ownership")
+```
+### first regression model
+```{r}
+#lets only allow stocks with more than 20 observations
+df$stock_RIC <- as.factor(df$stock_RIC)
+
+observation_count <- df %>%
+  mutate(observation = ifelse(is.na(monthly_std_dev) == TRUE, 0, 1)) %>%
+  group_by(stock_RIC) %>%
+  summarise(n_observations = sum(observation)) %>%
+  filter(n_observations > 20)
+              
+
+### only keep observations that are in this data frame
+stocks_to_keep <- observation_count$stock_RIC
+
+df_subset <- df %>%
+  filter(stock_RIC %in% stocks_to_keep)
+
+df_subset <- df_subset %>%
+  mutate(inv_price = 1/price,
+         log_market_cap = log(market_cap))
+
+pdata <- pdata.frame(df_subset, index = c("stock_RIC", "date"))
+
+# Convert dates to Date class if not already and extract month
+pdata$date <- as.Date(pdata$date)
+pdata$month <- format(pdata$date, "%m")
+
+# Convert month to a factor for fixed effects
+pdata$month <- as.factor(pdata$month)
+
+
+fe_model <- plm(monthly_std_dev ~ ETF_ownership + log_market_cap + 
+                  inv_price + return1Mo , data = pdata, model = "within")
+
+summary(fe_model)
+```
+
