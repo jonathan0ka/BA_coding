@@ -27,7 +27,6 @@ df_raw = read_csv("/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_
 
 df_raw$date <- as.Date(df_raw$date)
 
-dates_to_exclude <- as.Date(c("2015-04-01", "2015-07-01", "2015-10-01"))
 
 df <- df_raw %>%
   filter(!date %in% dates_to_exclude) %>%
