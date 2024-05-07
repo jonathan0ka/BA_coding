@@ -123,20 +123,23 @@ stock_level_data <- read_csv("/Users/jonathanzeh/Library/CloudStorage/OneDrive-P
 stock_level_data$date <- as.Date(stock_level_data$date)
 stock_level_data$stock_RIC <- as.factor(stock_level_data$stock_RIC)
 
-selected_dates <- seq.Date(from = as.Date("2019-07-01"), to = as.Date("2019-07-30"), by = "day")
+selected_dates <- seq.Date(from = as.Date("2019-06-01"), to = as.Date("2019-06-30"), by = "day")
 
 stock_level_data %>%
   filter(date %in% selected_dates & is.na(market_cap) == F) %>%
   group_by(stock_RIC) %>%
   summarise(n = n(), .groups = "drop")
 
+
 stock_level_data %>%
-  filter(date %in% selected_dates & is.na(market_cap) == F & stock_RIC == "ZURN.S")
+  filter(date %in% selected_dates) %>%
+  select(stock_RIC, date, market_cap)
 ```
 ## m_stock_level data
 ```{r}
 m_stock_level_data <- read_csv("/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/stock_level_data/m_stock_level_data.csv")
 
-
+m_stock_level_data %>%
+  filter(stock_RIC == "ZURN.S" & date %in% selected_dates)
 ```
 
