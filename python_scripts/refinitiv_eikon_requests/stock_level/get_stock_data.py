@@ -9,7 +9,7 @@ start_time = time.time()
 
 hsg_24 = "825c77d2d6cb4b3ba41d25d4c0b87c46325cd98c"
 uzh_2 = "80631b9534434526bb7b73ad26db914d4c2d9769"
-ek.set_app_key(hsg_24)
+ek.set_app_key(uzh_2)
 
 ########################################################################
 # dates
@@ -52,16 +52,18 @@ col_names = ["stock_RIC",
              "volume",
              "turnover",
              "market_cap",
+             "market_cap_TEST_1",
+             "market_cap_TEST_2",
              "gross_profit",
              "price_to_BV",
              "bid_price",
              "ask_price"
             ]
 
-#aggregated_df = pd.DataFrame(columns = col_names)
+aggregated_df = pd.DataFrame(columns = col_names)
 
-file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data.csv"
-#aggregated_df.to_csv(file_path, index=False)
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data_TEST_2.csv"
+aggregated_df.to_csv(file_path, index=False)
 
 ########################################################################
 # api request
@@ -83,7 +85,8 @@ fields = ["TR.PriceClose.date",
           #"TR.TURNOVER.date",
           ##########################
           "TR.CompanyMarketCap(Curn=EUR)",
-          #"TR.CompanyMarketCap.date",
+          "TR.CompanyMarketCapitalization(Curn=EUR)",
+          "TR.IssueMarketCap",
           ##########################
           "TR.GrossProfit(Period=FY0)", 
           "TR.PriceToBVPerShare", #book value / price
