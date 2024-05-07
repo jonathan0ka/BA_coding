@@ -6,7 +6,7 @@ from pandas import date_range
 from requests.exceptions import HTTPError, RequestException, Timeout
 import csv
 
-ek.set_app_key('80631b9534434526bb7b73ad26db914d4c2d9769')
+ek.set_app_key('488cf09b25e0443fa40991136a35d89a528ef404')
 
 ##############################################################
 # global stop
@@ -65,39 +65,9 @@ def get_first_days(start_date, end_date):
     # Format dates as strings and return as a list
     return [date.strftime('%Y-%m-%d') for date in date_range]
 
-########################################################################
-# dates storage
-########################################################################
-#file_path_date_tracking = 'D:\\30_One_Drive_Jonathan\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\date_tracking.csv'
+start_date = "2015-03-01" #
 
-# with open(file_path_date_tracking, mode='w', newline='') as file:
-#     csv_writer = csv.writer(file)
-#     headers = ["start_date", "end_date"]
-#     csv_writer.writerow(headers)
-#     csv_writer.writerow(['2014-07-01', '2024-01-01'])
-####################### ####################### ####################### 
-    
-# def update_csv(file_path, new_value, row_index=0, column_index=0):
-#     data = []
-
-#     # Modify the value at the specified row and column
-#     data[row_index][column_index] = new_value
-
-#     # Write the data back to the CSV file
-#     with open(file_path, mode='w', newline='') as file:
-#         csv_writer = csv.writer(file)
-#         csv_writer.writerows(data)
-#     print("date_tracking.csv has been successfully updated")
-    
-# with open(file_path_date_tracking, mode='r', newline='') as file:
-#     csv_reader = csv.reader(file)
-#     next(csv_reader)
-#     row = next(csv_reader)
-#     start_date = row[0]
-#     end_date = row[1]
-
-start_date = "2022-12-01" #
-end_date = "2022-12-01"
+end_date = "2015-11-01"
 first_days = get_first_days(start_date, end_date)
 
 ########################################################################
@@ -119,13 +89,13 @@ col_names = ["stock_RIC",
 
 #aggregated_df = pd.DataFrame(columns = col_names)
 
-file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_stocks_2021_01.csv"
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\fund_holdings_data\\etf_holdings_600_2014_01_2015_11.csv"
 #aggregated_df.to_csv(file_path, index=False)
 
 ########################################################################
 # api call function
 ########################################################################
-def fetch_data(value, sdate_for_year, max_retries=3):
+def fetch_data(value, sdate_for_year, max_retries=4):
     attempts = 0
     while attempts < max_retries:
         try:
