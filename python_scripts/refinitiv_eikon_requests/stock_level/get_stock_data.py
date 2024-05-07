@@ -9,7 +9,7 @@ start_time = time.time()
 
 hsg_24 = "825c77d2d6cb4b3ba41d25d4c0b87c46325cd98c"
 uzh_2 = "80631b9534434526bb7b73ad26db914d4c2d9769"
-ek.set_app_key(uzh_2)
+ek.set_app_key(hsg_24)
 
 ########################################################################
 # dates
@@ -26,7 +26,7 @@ def get_first_last_days(start_date_s, end_date_s):
 
     return list(zip(formatted_range_s, formatted_range_e))
 
-dates = get_first_last_days("2014-09-01", '2014-09-30')
+dates = get_first_last_days("2019-06-01", '2019-06-30')
 
 ########################################################################
 # get stock_RIC
@@ -62,7 +62,7 @@ col_names = ["stock_RIC",
 
 aggregated_df = pd.DataFrame(columns = col_names)
 
-file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data_TEST_2.csv"
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data_TEST_1.csv"
 aggregated_df.to_csv(file_path, index=False)
 
 ########################################################################
