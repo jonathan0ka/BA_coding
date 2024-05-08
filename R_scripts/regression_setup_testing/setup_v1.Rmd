@@ -105,41 +105,23 @@ plot(x = df$ETF_ownership, y = df$abs_Variance_Ratio, col = rgb(0, 0, 0, 0.012),
 
 ## stock level data
 ```{r}
-raw_stock_level_data <-read_csv(
+stock_level_data <-read_csv(
   "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/stock_level_data/stock_level_data.csv")
-
-ZURN_data <- raw_stock_level_data %>%
-  filter(stock_RIC == "ZURN.S")
-
-ZURN_data_test <- ZURN_data
-
-ZURN_data_test$date <- as.Date(ZURN_data_test$date)
-plot(ZURN_data$date, ZURN_data$market_cap)
-
-
-last(raw_stock_level_data)
-stock_level_data <- raw_stock_level_data
-
-stock_level_data$date <- as.Date(stock_level_data$date)
-#stock_level_data$stock_RIC <- as.factor(stock_level_data$stock_RIC)
-last(stock_level_data)
 
 selected_dates <- seq.Date(from = as.Date("2019-01-01"), to = as.Date("2019-07-30"), by = "day")
 
-stock_level_data <- stock_level_data %>%
+ZURN_data <- stock_level_data %>%
   filter(stock_RIC == "ZURN.S" & date %in% selected_dates)
 
-plot(stock_level_data$date, stock_level_data$market_cap)
-
-stock_level_data %>%
-  filter(date %in% selected_dates & is.na(market_cap) == F) %>%
-  group_by(stock_RIC) %>%
-  summarise(n = n(), .groups = "drop")
+plot(ZURN_data$date, ZURN_data$market_cap)
 
 
-stock_level_data %>%
-  filter(date %in% selected_dates) %>%
-  select(stock_RIC, date, market_cap)
+
+stock_level_data <- stock_level_data %>%
+  filter(stock_RIC == "ZURN.S")
+
+
+
 ```
 
 
