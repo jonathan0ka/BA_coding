@@ -3,7 +3,6 @@ title: "ETF Ownership"
 author: "Jonathan Alexander Zeh"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   html_document:
     theme: cerulean
     mainfont: Monaco
@@ -19,29 +18,39 @@ library(dplyr)
 library(purrr)
 library(knitr)
 library(readxl)
+library(DescTools)
 ```
 
-## data import
-```{r}
+# data import
+```{r, include = F}
 df_raw = read_csv("/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/variable_data/monthly_panel_v1.csv")
 
 df_raw$date <- as.Date(df_raw$date)
 
-
-df <- df_raw %>%
-  filter(!date %in% dates_to_exclude) %>%
-  select(date, stock_RIC, ETF_ownership, FUND_ownership, monthly_std_dev, market_cap, price, return1Mo)
+df <- df_raw
 ```
 
-## plots
-```{r}
-plot(x = df$ETF_ownership, y = df$monthly_std_dev, col = rgb(0, 0, 0, 0.012),
-     xlim = c(0, 0.2), ylim = c(0, 10),
+
+# plots
+## ETF ownership against stdev
+```{r, include = F}
+plot(x = df$ETF_ownership, y = df$monthly_std_dev, col = rgb(0, 0, 0, 0.3),
+     #xlim = c(0, 0.2), ylim = c(0, 10),
      main = "ETF Ownership against Monthly Standard Deviation",
      ylab = "Monthly Standard Deviation",
      xlab = "ETF Ownership")
 ```
-### first regression model
+
+
+
+# clean data
+## remove ETF_ownership outliers
+```{r}
+df <- df %>%
+  filter(ETF_ownership <= 1 | is.na(ETF_ownership) == TRUE, na.rm = TRUE)
+```
+
+## min number of observations
 ```{r}
 #lets only allow stocks with more than 20 observations
 df$stock_RIC <- as.factor(df$stock_RIC)
@@ -55,27 +64,196 @@ observation_count <- df %>%
 
 ### only keep observations that are in this data frame
 stocks_to_keep <- observation_count$stock_RIC
-
-df_subset <- df %>%
+df <- df %>%
   filter(stock_RIC %in% stocks_to_keep)
+```
 
-df_subset <- df_subset %>%
-  mutate(inv_price = 1/price,
-         log_market_cap = log(market_cap))
+## winsorize ETF_ownership
+```{r}
+winsorize_var <- function(x, probs = c(0.02, 0.98)) {
+  Winsorize(x, probs = probs, na.rm = TRUE)
+}
 
-pdata <- pdata.frame(df_subset, index = c("stock_RIC", "date"))
+df <- df %>%
+  group_by(stock_RIC) %>%
+  mutate(ETF_ownership_winsorized = winsorize_var(ETF_ownership),
+         monthly_std_dev_winsorized = winsorize_var(monthly_std_dev))
+```
 
-# Convert dates to Date class if not already and extract month
+## standardizing 
+```{r}
+df <- df %>%
+  mutate(final_ETF_ownership = scale(ETF_ownership_winsorized),
+         final_monthly_std_dev = scale(monthly_std_dev_winsorized),
+         final_FUND_ownership = scale(FUND_ownership))
+```
+
+## construct new variables
+```{r}
+df <- df %>%
+  mutate(log_market_cap = log(market_cap),
+         inv_price = 1/price)
+```
+
+## clean amihud_ratio
+```{r}
+df$amihud_ratio[is.infinite(df$amihud_ratio)] <- NA
+```
+
+
+# statistics
+## summarize etf ownership
+```{r}
+# Extract the year from the date column
+df <- df %>%
+  mutate(year = format(date, "%Y"))
+
+# Group by year and calculate the mean of the variable for each year
+annual_mean <- df %>%
+  group_by(year) %>%
+  summarize(mean_ETF_ownership = mean(ETF_ownership, na.rm = TRUE),
+            mean_ETF_ownership_wind = mean(ETF_ownership_winsorized, na.rm = TRUE))
+
+colnames(annual_mean) = c("year", "mean ETF Ownership", 
+                          "mean ETF ownership (windsorized)")
+# View the result
+kable(annual_mean)
+```
+## plot monthly mean
+```{r}
+monthly_mean <- df %>%
+  group_by(date) %>%
+  summarize(mean_ETF_ownership = mean(ETF_ownership_winsorized, na.rm = TRUE))
+
+plot(x = monthly_mean$date, y = monthly_mean$mean_ETF_ownership)
+
+  
+```
+
+
+## Data quality
+```{r, eval = F}
+# Calculate the number of non-NA observations for each stock and each variable
+df_summarized <- function(df){
+  df <- df %>%
+  group_by(stock_RIC) %>%
+  summarise(across(everything(), ~ sum(!is.na(.)), .names = "non_na_{col}"))
+  return(df)
+}
+
+library(openxlsx)
+
+##### monthly panel
+write.xlsx(df_summarized(df), 
+          file = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/data_statistics/non_na_counts_monthly_panel.xlsx", 
+          row.names = FALSE)
+
+#### stock_level_data
+write.xlsx(df_summarized(stock_level_data),
+           file = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/data_statistics/non_na_counts_stock_level_data.xlsx", 
+          row.names = FALSE)
+
+
+#### check monthly st dev
+monthly_st_dev <- read.csv("/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/datasets/eikon_data/stock_level_data/monthly_st_dev.csv")
+
+write.xlsx(df_summarized(monthly_st_dev), 
+    file = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/data_statistics/non_na_counts_monthly_st_dev.xlsx", 
+          row.names = FALSE)
+
+tmp <- df %>%
+  filter(stock_RIC == "ZURN.S")
+
+tmp_daily <- stock_level_data %>%
+  filter(stock_RIC == "ZURN.S")
+```
+
+
+# regression setups
+## linear models
+```{r}
+mod_1 <- lm(final_monthly_std_dev ~ final_ETF_ownership, data = df)
+summary(mod_1)
+
+mod_2 <- lm(final_monthly_std_dev ~ final_ETF_ownership + log_market_cap + 
+                  inv_price + cumulative_return_12m  + amihud_ratio + FUND_ownership,
+            data = df)
+summary(mod_2)
+```
+
+
+## panel regression: time and entity fixed 
+```{r}
+library(plm)
+
+#######################################################
+pdata <- pdata.frame(df, index = c("stock_RIC", "date"))
 pdata$date <- as.Date(pdata$date)
 pdata$month <- format(pdata$date, "%m")
+#######################################################
 
 # Convert month to a factor for fixed effects
 pdata$month <- as.factor(pdata$month)
 
+fe_model_1 <- plm(final_monthly_std_dev ~ final_ETF_ownership + log_market_cap + 
+                  inv_price + cumulative_return_12m + amihud_ratio + FUND_ownership, 
+                  data = pdata, model = "within")
 
-fe_model <- plm(monthly_std_dev ~ ETF_ownership + log_market_cap + 
-                  inv_price + return1Mo , data = pdata, model = "within")
+fe_model_2 <- plm(monthly_std_dev ~ ETF_ownership + log_market_cap + 
+                  inv_price + cumulative_return_12m  + amihud_ratio + FUND_ownership, 
+                  data = pdata, model = "within")
 
-summary(fe_model)
+summary(fe_model_1)
+summary(fe_model_2)
 ```
+# sample split by period
+## splitting data
+```{r}
+df_1 <- df %>%
+  filter(year < 2020)
+df_2 <- df %>%
+  filter(2020 <= year & year < 2021)
+df_3 <- df %>%
+  filter(2021 <= year)
+```
+
+## fixed effects regression function
+```{r}
+fixed_effects_coefficients <- function(df){
+  #######################################################
+  pdata <- pdata.frame(df, index = c("stock_RIC", "date"))
+  pdata$date <- as.Date(pdata$date)
+  pdata$month <- format(pdata$date, "%m")
+  #######################################################
+
+  # Convert month to a factor for fixed effects
+  pdata$month <- as.factor(pdata$month)
+  
+  fe_model <- plm(final_monthly_std_dev ~ final_ETF_ownership + log_market_cap + 
+                    inv_price + cumulative_return_12m + amihud_ratio + FUND_ownership, 
+                    data = pdata, model = "within")
+  
+  return(summary(fe_model))
+}
+
+summary_1 <- fixed_effects_coefficients(df_1)
+
+df_coefficients <- tibble(
+  variables = c("ETF_ownership", "log_market_cap", "inv_price",
+                                "cumulative_return_12m", "amihud_ratio",
+                                "FUND_ownership"),
+  coefficents_2010_2019 = fixed_effects_coefficients(df_1)$coefficients[, c(1)],
+  p_val_2010_2019 = fixed_effects_coefficients(df_1)$coefficients[, c(4)],
+  coefficients_2020 = fixed_effects_coefficients(df_2)$coefficients[, c(1)],
+  p_val_2020 = fixed_effects_coefficients(df_1)$coefficients[, c(4)],
+  coefficients_2021_2023 = fixed_effects_coefficients(df_3)$coefficients[, c(1)],
+  p_val_2021_2023 = fixed_effects_coefficients(df_1)$coefficients[, c(4)]
+)
+print(df_coefficients)
+```
+
+
+
+
+
 
