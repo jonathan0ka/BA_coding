@@ -165,4 +165,5 @@ cython_debug/
 datasets/
 R_exports/
 random/
-.Rproj.user
+.Rproj.user/
+R_scripts/
