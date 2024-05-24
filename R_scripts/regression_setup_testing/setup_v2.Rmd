@@ -145,13 +145,17 @@ monthly_mean <- df_clean %>%
 
 monthly_mean
 par(mfrow = c(1,2))
-plot(x = monthly_mean$date, y = monthly_mean$mean_shares_outstanding, 
-     main = "method: shares outstanding", ylab = "weighted mean", xlab = "months")
-points(monthly_mean$date, y = monthly_mean$FUND_mean_shares_outstanding, col = "red")
+plot(x = monthly_mean$date, y = monthly_mean$mean_shares_outstanding, ylim = c(0, 26),
+     main = "method: shares outstanding", ylab = "weighted mean", xlab = "months", 
+     type = "l")
+points(monthly_mean$date, y = monthly_mean$FUND_mean_shares_outstanding, col = "red",
+      type = "l")
 
-plot(x = monthly_mean$date, y = monthly_mean$mean_market_cap,
-     main = "method: market cap", ylab = "weighted mean", xlab = "months")
-points(monthly_mean$date, y = monthly_mean$FUND_mean_market_cap, col = "red")
+plot(x = monthly_mean$date, y = monthly_mean$mean_market_cap, ylim = c(0, 0.26),
+     main = "method: market cap", ylab = "weighted mean", xlab = "months", 
+     type = "l")
+points(monthly_mean$date, y = monthly_mean$FUND_mean_market_cap, col = "red", 
+       type = "l")
 
 ```
 
