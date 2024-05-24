@@ -42,13 +42,20 @@ plot(x = df$ETF_ownership, y = df$monthly_std_dev, col = rgb(0, 0, 0, 0.3),
 ```
 
 
-
 # clean data
 ## remove ETF_ownership outliers
 ```{r}
 df <- df %>%
   filter(ETF_ownership <= 1 | is.na(ETF_ownership) == TRUE, na.rm = TRUE)
 ```
+
+## handle zero values
+```{r}
+df$percent_of_traded_shares[df$percent_of_traded_shares == 0] <- NA
+df$market_cap[df$market_cap == 0] <- NA
+df$ETF_ownership[df$ETF_ownership == 0] <- NA
+```
+
 
 ## min number of observations
 ```{r}
@@ -111,25 +118,60 @@ df <- df %>%
 # Group by year and calculate the mean of the variable for each year
 annual_mean <- df %>%
   group_by(year) %>%
-  summarize(mean_ETF_ownership = mean(ETF_ownership, na.rm = TRUE),
-            mean_ETF_ownership_wind = mean(ETF_ownership_winsorized, na.rm = TRUE))
+  summarize(mean_ETF_ownership = mean(ETF_ownership, na.rm = TRUE) * 100,
+            mean_ETF_ownership_outstanding = 
+              mean(percent_of_traded_shares, na.rm = TRUE),
+            percentage_diff = (mean_ETF_ownership_outstanding / mean_ETF_ownership) - 1)
 
 colnames(annual_mean) = c("year", "mean ETF Ownership", 
-                          "mean ETF ownership (windsorized)")
+                          "mean ETF ownership (windsorized)",
+                          "deviation in percentage")
 # View the result
 kable(annual_mean)
 ```
 ## plot monthly mean
 ```{r}
-monthly_mean <- df %>%
+df_clean <- df[!is.na(df$percent_of_traded_shares) & !is.na(df$market_cap) & df$market_cap > 0, ]
+
+monthly_mean <- df_clean %>%
   group_by(date) %>%
-  summarize(mean_ETF_ownership = mean(ETF_ownership_winsorized, na.rm = TRUE))
+  summarize(mean_shares_outstanding = 
+            weighted.mean(percent_of_traded_shares, market_cap, na.rm = TRUE),
+            mean_market_cap = weighted.mean(ETF_ownership, market_cap, na.rm = TRUE),
+            FUND_mean_shares_outstanding = weighted.mean(FUND_percent_of_traded_shares,
+                                                         market_cap, na.rm = TRUE),
+            FUND_mean_market_cap = weighted.mean(FUND_ownership, market_cap, 
+                                                 na.rm = TRUE))
 
-plot(x = monthly_mean$date, y = monthly_mean$mean_ETF_ownership)
+monthly_mean
+par(mfrow = c(1,2))
+plot(x = monthly_mean$date, y = monthly_mean$mean_shares_outstanding, 
+     main = "method: shares outstanding", ylab = "weighted mean", xlab = "months")
+points(monthly_mean$date, y = monthly_mean$FUND_mean_shares_outstanding, col = "red")
 
-  
+plot(x = monthly_mean$date, y = monthly_mean$mean_market_cap,
+     main = "method: market cap", ylab = "weighted mean", xlab = "months")
+points(monthly_mean$date, y = monthly_mean$FUND_mean_market_cap, col = "red")
+
 ```
 
+## find stock that pushed etf ownership up in 2015-10-31
+```{r}
+df_subset <- df %>%
+  filter(date == as.Date("2015-10-31") | date == as.Date("2015-09-30"))
+
+comp <- df_subset %>%
+  group_by(stock_RIC) %>%
+  summarize(
+    diff = round(
+      (percent_of_traded_shares[date == as.Date("2015-10-31")] - 
+       percent_of_traded_shares[date == as.Date("2015-09-30")]) / 
+       percent_of_traded_shares[date == as.Date("2015-09-30")], 3)
+  ) %>%
+  arrange(desc(diff))
+
+print(comp)
+```
 
 ## Data quality
 ```{r, eval = F}
