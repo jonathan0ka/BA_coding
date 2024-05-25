@@ -273,7 +273,7 @@ fe_model_2 <- plm(final_monthly_std_dev ~ final_ETF_ownership + log_market_cap +
 summary(fe_model_1)
 summary(fe_model_2)
 ```
-# sample split by period
+# regression functions
 ## fixed effects regression function
 ```{r}
 library(plm)
@@ -334,28 +334,26 @@ data_on_fe_function <- function(df){
 }
 ```
 
-## run regression
-```{r}
-########### v1
-fe_models_list <- data_on_fe_function(df) 
-summary(fe_models_list[1])
-fe_models_list[[1]]
-```
-
-
-## fixed effects results
-### without laggs
+## stargazer function
 ```{r}
 library(stargazer)
 
-############################################################ models without lags
-stargazer_function <- function(fe_models_list, variables, title_table, file_name)
+stargazer_function <- function(fe_models_list, variables, 
+                               volatility_lag = FALSE, title_table, file_name) {
   folder_path = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/"
-  output_path = cat(folder_path, file_name)
-
-  latex_code <- stargazer(fe_models_list[[1]],
-            fe_models_list[[2]],
-            fe_models_list[[3]],
+  output_path = paste0(folder_path, file_name)
+  
+  if(volatility_lag == TRUE){
+    mod_1 <- fe_models_list[[4]]
+    mod_2 <- fe_models_list[[5]]
+    mod_3 <- fe_models_list[[6]]
+  } else {
+    mod_1 <- fe_models_list[[1]]
+    mod_2 <- fe_models_list[[2]]
+    mod_3 <- fe_models_list[[3]]
+  }
+  
+  latex_code <- stargazer(mod_1, mod_2, mod_3,
             
             type = "latex",
             title = title_table,
@@ -368,131 +366,38 @@ stargazer_function <- function(fe_models_list, variables, title_table, file_name
                              c("Stock fixed effects", 
                                "Yes", "Yes", "Yes")),
             out = output_path)
-
-############################################################ models with lags
-latex_code <- stargazer(fe_models_list[[4]],
-          fe_models_list[[5]],
-          fe_models_list[[6]],
-          
-          type = "latex",
-          title = "First Results Jonathan",
-          dep.var.labels = c("Daily Volatility (t)"),
-          column.labels = c("2010 to 2019", "2020", "2021 to 2023"),
-          covariate.labels = 
-            c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", "Amihud t-1",
-              "Bid-ask spread t-1", "Past 12-month returns t-1", 
-              "Fund ownership t-1", "Volatility t-1", 
-              "Volatility t-2", "Volatility t-3"),
-          omit.stat = c("f", "ser"),
-          add.lines = list(c("Month fixed effects", 
-                             "Yes", "Yes", "Yes"),
-                           c("Stock fixed effects", 
-                             "Yes", "Yes", "Yes")),
-          out = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/regression_table_sample_split_1_laggs.tex")
-
-c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", "Amihud t-1",
-                "Bid-ask spread t-1", "Past 12-month returns t-1", 
-                "Fund ownership t-1")
+}
 ```
 
-```{=latex, include = F, eval = F}
-\begin{landscape}
-`r cat(latex_code, sep = "\n")`
-\end{landscape}
-```
+### running regressions
+```{r, echo = False}
+#################################################################
+# Data: df, Type: no lag, Index: FALSE
+#################################################################
+fe_models_list_no_lag <- data_on_fe_function(df)
 
-### with laggs
-```{r}
-library(stargazer)
+variables_no_lag <- c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", 
+                      "Amihud t-1", "Bid-ask spread t-1", 
+                      "Past 12-month returns t-1", "Fund ownership t-1")
 
-latex_code <- stargazer(fe_models_list[[4]],
-          fe_models_list[[5]],
-          fe_models_list[[6]],
-          
-          type = "latex",
-          title = "First Results Jonathan",
-          dep.var.labels = c("Daily Volatility (t)"),
-          column.labels = c("2010 to 2019", "2020", "2021 to 2023"),
-          covariate.labels = 
-            c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", "Amihud t-1",
-              "Bid-ask spread t-1", "Past 12-month returns t-1", 
-              "Fund ownership t-1", "Volatility t-1", 
-              "Volatility t-2", "Volatility t-3"),
-          omit.stat = c("f", "ser"),
-          add.lines = list(c("Month fixed effects", 
-                             "Yes", "Yes", "Yes"),
-                           c("Stock fixed effects", 
-                             "Yes", "Yes", "Yes")),
-          out = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/regression_table_sample_split_1_laggs.tex")
+stargazer_function(fe_models_list_no_lag, variables_no_lag, FALSE,
+                   "Data: df, Type: no lag, Index: FALSE", "table_df_no_lag.tex")
+
+#################################################################
+# Data: df, Type: lag, Index: FALSE
+#################################################################
+fe_models_list_lag <- data_on_fe_function(df)
+
+variables_lag <- c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", 
+                      "Amihud t-1", "Bid-ask spread t-1", 
+                      "Past 12-month returns t-1", "Fund ownership t-1", 
+                      "Volatility t-1", "Volatility t-2", "Volatility t-3")
+
+stargazer_function(fe_models_list_lag, variables_lag, TRUE,
+                   "Data: df, Type: lag, Index: FALSE", "table_df_lag.tex")
 ```
 
 
-
-###old code
-```{r, eval = F, include=F}
-
-stargazer(fe_model_2009_2019, fe_model_2009_2019_lag,
-          fe_model_2020, fe_model_2020_lag,
-          fe_model_2021_2023, fe_model_2021_2023_lag,
-          
-          type = "latex",
-          title = "First Results Jonathan",
-          dep.var.labels = c("Dependent Variable"),
-          column.labels = c("2010 to 2019", "2020", "2021 to 2023"),
-          covariate.labels = 
-            c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", "Amihud t-1",
-              "Bid-ask spread t-1", "Book-to-market t-1", 
-              "Past 12-month returns t-1", 
-              "Fund ownership t-1", "Volatility t-1", 
-              "Volatility t-2", "Volatility t-3"),
-          omit.stat = c("f", "ser"),
-          add.lines = list(c("Month fixed effects", 
-                             "Yes", "Yes", "Yes", "Yes", "Yes", "Yes"),
-                           c("Stock fixed effects", 
-                             "Yes", "Yes", "Yes", "Yes", "Yes", "Yes")),
-          out = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/regression_table.tex")
-
-
-
-
-
-library(stargazer)
-
-# Define separate covariate labels for models with and without lagged variables
-
-covariate_labels <- c(
-  "ETF ownership", "log(Mktcap t-1)", "1/Price t-1", "Amihud t-1",
-  "Bid-ask spread t-1", "Past 12-month returns t-1",
-  "Fund ownership t-1", "Volatility t-1", "Volatility t-2", "Volatility t-3"
-)
-
-# Run stargazer with appropriate covariate labels
-latex_code <- stargazer(
-  fe_model_2009_2019, fe_model_2009_2019_lag,
-  fe_model_2020, fe_model_2020_lag,
-  fe_model_2021_2023, fe_model_2021_2023_lag,
-  
-  title = "OLS Regressions, Sample Split by Period",
-  type = "latex",
-  style = "AER",
-  column.labels = c("2009 to 2019", "2020", "2021 to 2023"),
-  dep.var.labels.include = FALSE,
-  dep.var.caption = "Daily Volatility (t)",
-  
-  covariate.labels = covariate_labels,
-  
-  omit = c("Volatility t-1", "Volatility t-2", "Volatility t-3"),
-  omit.labels = c("1", "3", "5"),
-  intercept.bottom = FALSE,
-  omit.stat = c("f", "ser"),
-  add.lines = list(
-    c("Month fixed effects", "Yes", "Yes", "Yes"),
-    c("Stock fixed effects", "Yes", "Yes", "Yes")),
-  
-  out = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/regression_table_test.tex"
-)
-
-```
 
 
 
