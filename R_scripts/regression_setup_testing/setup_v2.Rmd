@@ -3,9 +3,10 @@ title: "ETF Ownership"
 author: "Jonathan Alexander Zeh"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    theme: cerulean
-    mainfont: Monaco
+  pdf_document:
+  #html_document:
+    #theme: cerulean
+    #mainfont: Monaco
 ---
 
 ```{r setup, include = FALSE}
@@ -84,15 +85,22 @@ winsorize_var <- function(x, probs = c(0.02, 0.98)) {
 df <- df %>%
   group_by(stock_RIC) %>%
   mutate(ETF_ownership_winsorized = winsorize_var(ETF_ownership),
-         monthly_std_dev_winsorized = winsorize_var(monthly_std_dev))
+         FUND_ownership_wisorized = winsorize_var(FUND_ownership),
+         monthly_std_dev_winsorized = winsorize_var(monthly_std_dev),
+         T1_monthly_std_dev_winzorized = winsorize_var(T1_monthly_std_dev),
+         T2_monthly_std_dev_winzorized = winsorize_var(T2_monthly_std_dev),
+         T3_monthly_std_dev_winzorized = winsorize_var(T3_monthly_std_dev))
 ```
 
 ## standardizing 
 ```{r}
 df <- df %>%
   mutate(final_ETF_ownership = scale(ETF_ownership_winsorized),
+         final_FUND_ownership = scale(FUND_ownership_wisorized),
          final_monthly_std_dev = scale(monthly_std_dev_winsorized),
-         final_FUND_ownership = scale(FUND_ownership))
+         final_T1_monthly_std_dev = scale(T1_monthly_std_dev_winzorized),
+         final_T2_monthly_std_dev = scale(T2_monthly_std_dev_winzorized),
+         final_T3_monthly_std_dev = scale(T3_monthly_std_dev_winzorized))
 ```
 
 ## construct new variables
@@ -106,7 +114,6 @@ df <- df %>%
 ```{r}
 df$amihud_ratio[is.infinite(df$amihud_ratio)] <- NA
 ```
-
 
 # statistics
 ## summarize etf ownership
@@ -150,12 +157,30 @@ plot(x = monthly_mean$date, y = monthly_mean$mean_shares_outstanding, ylim = c(0
      type = "l")
 points(monthly_mean$date, y = monthly_mean$FUND_mean_shares_outstanding, col = "red",
       type = "l")
-
 plot(x = monthly_mean$date, y = monthly_mean$mean_market_cap, ylim = c(0, 0.26),
      main = "method: market cap", ylab = "weighted mean", xlab = "months", 
      type = "l")
 points(monthly_mean$date, y = monthly_mean$FUND_mean_market_cap, col = "red", 
        type = "l")
+
+```
+## monthly change in ETF and FUND ownership
+```{r}
+monthly_mean <- monthly_mean %>%
+  mutate(change_ETF = diff(mean_shares_outstanding) / lag(mean_shares_outstanding, 1),
+         change_FUND = diff(
+           FUND_mean_shares_outstanding) / lag(FUND_mean_shares_outstanding, 1))
+
+monthly_mean
+plot(x = monthly_mean$date, y = monthly_mean$change_ETF, #ylim = c(0, 26),
+     main = "Growth rates of weighted mean ownership", ylab = "Growth rates", xlab = "months", 
+     type = "l")
+points(monthly_mean$date, y = monthly_mean$change_FUND, col = "red",
+      type = "l")
+legend("topright",
+       legend = c("ETFs", "Mutual Funds"),
+       col = c("black", "red"),
+       lty = 1)
 
 ```
 
@@ -178,7 +203,7 @@ print(comp)
 ```
 
 ## Data quality
-```{r, eval = F}
+```{r, eval = F, include=F}
 # Calculate the number of non-NA observations for each stock and each variable
 df_summarized <- function(df){
   df <- df %>%
@@ -206,18 +231,12 @@ monthly_st_dev <- read.csv("/Users/jonathanzeh/Library/CloudStorage/OneDrive-Per
 write.xlsx(df_summarized(monthly_st_dev), 
     file = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/data_statistics/non_na_counts_monthly_st_dev.xlsx", 
           row.names = FALSE)
-
-tmp <- df %>%
-  filter(stock_RIC == "ZURN.S")
-
-tmp_daily <- stock_level_data %>%
-  filter(stock_RIC == "ZURN.S")
 ```
 
 
 # regression setups
 ## linear models
-```{r}
+```{r, eval = F, include=F}
 mod_1 <- lm(final_monthly_std_dev ~ final_ETF_ownership, data = df)
 summary(mod_1)
 
@@ -229,7 +248,7 @@ summary(mod_2)
 
 
 ## panel regression: time and entity fixed 
-```{r}
+```{r, eval = F, include=F}
 library(plm)
 
 #######################################################
@@ -242,62 +261,238 @@ pdata$month <- format(pdata$date, "%m")
 pdata$month <- as.factor(pdata$month)
 
 fe_model_1 <- plm(final_monthly_std_dev ~ final_ETF_ownership + log_market_cap + 
-                  inv_price + cumulative_return_12m + amihud_ratio + FUND_ownership, 
+                  inv_price + cumulative_return_12m + amihud_ratio + final_FUND_ownership + monthly_relative_spread, 
                   data = pdata, model = "within")
 
-fe_model_2 <- plm(monthly_std_dev ~ ETF_ownership + log_market_cap + 
-                  inv_price + cumulative_return_12m  + amihud_ratio + FUND_ownership, 
+fe_model_2 <- plm(final_monthly_std_dev ~ final_ETF_ownership + log_market_cap + 
+                  inv_price + cumulative_return_12m  + amihud_ratio + final_FUND_ownership +
+                    monthly_relative_spread + final_T1_monthly_std_dev +
+                    final_T2_monthly_std_dev + final_T3_monthly_std_dev,
                   data = pdata, model = "within")
 
 summary(fe_model_1)
 summary(fe_model_2)
 ```
 # sample split by period
-## splitting data
-```{r}
-df_1 <- df %>%
-  filter(year < 2020)
-df_2 <- df %>%
-  filter(2020 <= year & year < 2021)
-df_3 <- df %>%
-  filter(2021 <= year)
-```
-
 ## fixed effects regression function
 ```{r}
-fixed_effects_coefficients <- function(df){
-  #######################################################
-  pdata <- pdata.frame(df, index = c("stock_RIC", "date"))
+library(plm)
+
+fe_function <- function(df, start_year, end_year, volatility_lag = FALSE){
+  ####################################################### sample split by period
+  df_f <- df
+  df_f$year <- format(df_f$date, "%Y")
+  df_f <- df_f %>%
+    filter(start_year <= year & year < end_year)
+  
+  
+  ####################################################### plm object
+  pdata <- pdata.frame(df_f, index = c("stock_RIC", "date"))
   pdata$date <- as.Date(pdata$date)
   pdata$month <- format(pdata$date, "%m")
   #######################################################
 
-  # Convert month to a factor for fixed effects
+  # convert month to a factor for fixed effects
   pdata$month <- as.factor(pdata$month)
   
-  fe_model <- plm(final_monthly_std_dev ~ final_ETF_ownership + log_market_cap + 
-                    inv_price + cumulative_return_12m + amihud_ratio + FUND_ownership, 
+  if(volatility_lag == FALSE){
+  fe_model <- plm(final_monthly_std_dev ~ final_ETF_ownership + log_market_cap +
+                    inv_price + amihud_ratio + monthly_relative_spread +
+                    cumulative_return_12m + final_FUND_ownership, 
                     data = pdata, model = "within")
+  }
   
-  return(summary(fe_model))
+  if(volatility_lag == TRUE){
+  fe_model <- plm(final_monthly_std_dev ~ final_ETF_ownership + log_market_cap +
+                    inv_price + amihud_ratio + monthly_relative_spread +
+                    cumulative_return_12m + final_FUND_ownership +
+                    final_T1_monthly_std_dev + final_T2_monthly_std_dev +
+                    final_T3_monthly_std_dev,
+                    data = pdata, model = "within")
+  }
+  
+  return(fe_model)
 }
-
-summary_1 <- fixed_effects_coefficients(df_1)
-
-df_coefficients <- tibble(
-  variables = c("ETF_ownership", "log_market_cap", "inv_price",
-                                "cumulative_return_12m", "amihud_ratio",
-                                "FUND_ownership"),
-  coefficents_2010_2019 = fixed_effects_coefficients(df_1)$coefficients[, c(1)],
-  p_val_2010_2019 = fixed_effects_coefficients(df_1)$coefficients[, c(4)],
-  coefficients_2020 = fixed_effects_coefficients(df_2)$coefficients[, c(1)],
-  p_val_2020 = fixed_effects_coefficients(df_1)$coefficients[, c(4)],
-  coefficients_2021_2023 = fixed_effects_coefficients(df_3)$coefficients[, c(1)],
-  p_val_2021_2023 = fixed_effects_coefficients(df_1)$coefficients[, c(4)]
-)
-print(df_coefficients)
 ```
 
+## implement fixed effects function
+```{r}
+data_on_fe_function <- function(df){
+  fe_model_2009_2019 <- fe_function(df, 2009, 2020, volatility_lag = FALSE)
+  fe_model_2009_2019_lag <- fe_function(df, 2009, 2020, volatility_lag = TRUE)
+  
+  fe_model_2020 <- fe_function(df, 2020, 2021, volatility_lag = FALSE)
+  fe_model_2020_lag <- fe_function(df, 2020, 2021, volatility_lag = TRUE)
+  
+  fe_model_2021_2023 <- fe_function(df, 2021, 2024, volatility_lag = FALSE)
+  fe_model_2021_2023_lag <- fe_function(df, 2021, 2024, volatility_lag = TRUE)
+  
+  fe_models_list <- list(fe_model_2009_2019, fe_model_2020, fe_model_2021_2023,
+                         fe_model_2009_2019_lag, fe_model_2020_lag,
+                         fe_model_2021_2023_lag)
+  return(fe_models_list)
+}
+```
+
+## run regression
+```{r}
+########### v1
+fe_models_list <- data_on_fe_function(df) 
+summary(fe_models_list[1])
+fe_models_list[[1]]
+```
+
+
+## fixed effects results
+### without laggs
+```{r}
+library(stargazer)
+
+############################################################ models without lags
+stargazer_function <- function(fe_models_list, variables, title_table, file_name)
+  folder_path = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/"
+  output_path = cat(folder_path, file_name)
+
+  latex_code <- stargazer(fe_models_list[[1]],
+            fe_models_list[[2]],
+            fe_models_list[[3]],
+            
+            type = "latex",
+            title = title_table,
+            dep.var.labels = c("Daily Volatility (t)"),
+            column.labels = c("2010 to 2019", "2020", "2021 to 2023"),
+            covariate.labels = variables,
+            omit.stat = c("f", "ser"),
+            add.lines = list(c("Month fixed effects", 
+                               "Yes", "Yes", "Yes"),
+                             c("Stock fixed effects", 
+                               "Yes", "Yes", "Yes")),
+            out = output_path)
+
+############################################################ models with lags
+latex_code <- stargazer(fe_models_list[[4]],
+          fe_models_list[[5]],
+          fe_models_list[[6]],
+          
+          type = "latex",
+          title = "First Results Jonathan",
+          dep.var.labels = c("Daily Volatility (t)"),
+          column.labels = c("2010 to 2019", "2020", "2021 to 2023"),
+          covariate.labels = 
+            c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", "Amihud t-1",
+              "Bid-ask spread t-1", "Past 12-month returns t-1", 
+              "Fund ownership t-1", "Volatility t-1", 
+              "Volatility t-2", "Volatility t-3"),
+          omit.stat = c("f", "ser"),
+          add.lines = list(c("Month fixed effects", 
+                             "Yes", "Yes", "Yes"),
+                           c("Stock fixed effects", 
+                             "Yes", "Yes", "Yes")),
+          out = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/regression_table_sample_split_1_laggs.tex")
+
+c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", "Amihud t-1",
+                "Bid-ask spread t-1", "Past 12-month returns t-1", 
+                "Fund ownership t-1")
+```
+
+```{=latex, include = F, eval = F}
+\begin{landscape}
+`r cat(latex_code, sep = "\n")`
+\end{landscape}
+```
+
+### with laggs
+```{r}
+library(stargazer)
+
+latex_code <- stargazer(fe_models_list[[4]],
+          fe_models_list[[5]],
+          fe_models_list[[6]],
+          
+          type = "latex",
+          title = "First Results Jonathan",
+          dep.var.labels = c("Daily Volatility (t)"),
+          column.labels = c("2010 to 2019", "2020", "2021 to 2023"),
+          covariate.labels = 
+            c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", "Amihud t-1",
+              "Bid-ask spread t-1", "Past 12-month returns t-1", 
+              "Fund ownership t-1", "Volatility t-1", 
+              "Volatility t-2", "Volatility t-3"),
+          omit.stat = c("f", "ser"),
+          add.lines = list(c("Month fixed effects", 
+                             "Yes", "Yes", "Yes"),
+                           c("Stock fixed effects", 
+                             "Yes", "Yes", "Yes")),
+          out = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/regression_table_sample_split_1_laggs.tex")
+```
+
+
+
+###old code
+```{r, eval = F, include=F}
+
+stargazer(fe_model_2009_2019, fe_model_2009_2019_lag,
+          fe_model_2020, fe_model_2020_lag,
+          fe_model_2021_2023, fe_model_2021_2023_lag,
+          
+          type = "latex",
+          title = "First Results Jonathan",
+          dep.var.labels = c("Dependent Variable"),
+          column.labels = c("2010 to 2019", "2020", "2021 to 2023"),
+          covariate.labels = 
+            c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", "Amihud t-1",
+              "Bid-ask spread t-1", "Book-to-market t-1", 
+              "Past 12-month returns t-1", 
+              "Fund ownership t-1", "Volatility t-1", 
+              "Volatility t-2", "Volatility t-3"),
+          omit.stat = c("f", "ser"),
+          add.lines = list(c("Month fixed effects", 
+                             "Yes", "Yes", "Yes", "Yes", "Yes", "Yes"),
+                           c("Stock fixed effects", 
+                             "Yes", "Yes", "Yes", "Yes", "Yes", "Yes")),
+          out = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/regression_table.tex")
+
+
+
+
+
+library(stargazer)
+
+# Define separate covariate labels for models with and without lagged variables
+
+covariate_labels <- c(
+  "ETF ownership", "log(Mktcap t-1)", "1/Price t-1", "Amihud t-1",
+  "Bid-ask spread t-1", "Past 12-month returns t-1",
+  "Fund ownership t-1", "Volatility t-1", "Volatility t-2", "Volatility t-3"
+)
+
+# Run stargazer with appropriate covariate labels
+latex_code <- stargazer(
+  fe_model_2009_2019, fe_model_2009_2019_lag,
+  fe_model_2020, fe_model_2020_lag,
+  fe_model_2021_2023, fe_model_2021_2023_lag,
+  
+  title = "OLS Regressions, Sample Split by Period",
+  type = "latex",
+  style = "AER",
+  column.labels = c("2009 to 2019", "2020", "2021 to 2023"),
+  dep.var.labels.include = FALSE,
+  dep.var.caption = "Daily Volatility (t)",
+  
+  covariate.labels = covariate_labels,
+  
+  omit = c("Volatility t-1", "Volatility t-2", "Volatility t-3"),
+  omit.labels = c("1", "3", "5"),
+  intercept.bottom = FALSE,
+  omit.stat = c("f", "ser"),
+  add.lines = list(
+    c("Month fixed effects", "Yes", "Yes", "Yes"),
+    c("Stock fixed effects", "Yes", "Yes", "Yes")),
+  
+  out = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/regression_table_test.tex"
+)
+
+```
 
 
 
