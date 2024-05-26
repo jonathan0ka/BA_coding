@@ -137,28 +137,32 @@ annual_mean_function <- function(df) {
                                              market_cap, na.rm = TRUE) * 100,
               etf_2 = weighted.mean(percent_of_traded_shares, market_cap,
                                           na.rm = TRUE),
-              etf_market_cap = sum(stock_value_held, na.rm = TRUE),
+              etf_market_cap = sum(stock_value_held, na.rm = TRUE)/10000,
               
               fund_1 = weighted.mean(FUND_ownership, market_cap,
                                                  na.rm = TRUE) * 100,
               fund_2 = weighted.mean(FUND_percent_of_traded_shares, market_cap,
                                           na.rm = TRUE),
-              fund_market_cap = sum(FUND_stock_value_held, na.rm = TRUE),
+              fund_market_cap = sum(FUND_stock_value_held, na.rm = TRUE)/10000,
               
               index_fund_1 = weighted.mean(INDEX_FUND_ownership, market_cap,
                                                  na.rm = TRUE) * 100,
               index_fund_2 = weighted.mean(INDEX_FUND_percent_of_traded_shares,
                                            market_cap, na.rm = TRUE),
-              index_fund_market_cap = sum(INDEX_FUND_stock_value_held, na.rm = TRUE),
+              index_fund_market_cap = sum(INDEX_FUND_stock_value_held, 
+                                          na.rm = TRUE)/10000,
               
               active_fund_1 = weighted.mean(ACTIVE_FUND_ownership, market_cap,
                                                  na.rm = TRUE) * 100,
               active_fund_2 = weighted.mean(ACTIVE_FUND_percent_of_traded_shares,
                                             market_cap, na.rm = TRUE),
-              active_fund_market_cap = sum(ACTIVE_FUND_stock_value_held, na.rm = TRUE),
-              .groups = "drop") 
+              active_fund_market_cap = sum(ACTIVE_FUND_stock_value_held, 
+                                           na.rm = TRUE)/10000,
+              .groups = "drop")
   
   annual_mean$year <- as.character(annual_mean$year)
+  annual_mean <- annual_mean %>% 
+    mutate_if(is.numeric, round, digits = 2)
 
   annual_mean <- annual_mean %>%
     arrange(year)
@@ -170,6 +174,14 @@ annual_mean_df_index <- annual_mean_function(df_index)
 # View the result
 kable(annual_mean_df)
 kable(annual_mean_df_index)
+
+annual_mean_df_subset <- annual_mean_df %>%
+  select(year, etf_1, etf_market_cap, index_fund_1, index_fund_market_cap,
+         active_fund_1, active_fund_market_cap)
+
+annual_mean_df_index_subset <- annual_mean_df_index %>%
+  select(year, etf_2, etf_market_cap, index_fund_2, index_fund_market_cap,
+         active_fund_2, active_fund_market_cap)
 
 ```
 ## plot monthly mean
@@ -374,20 +386,14 @@ fe_function <- function(df, start_year, end_year,
 ## implement fixed effects function
 ```{r}
 data_on_fe_function <- function(df, fund_split = FALSE){
-  fe_model_2009_2019 <- fe_function(df, 2009, 2020, 
-                                    volatility_lag = FALSE, fund_split)
-  fe_model_2009_2019_lag <- fe_function(df, 2009, 2020, 
-                                        volatility_lag = TRUE, fund_split)
+  fe_model_2009_2019 <- fe_function(df, 2009, 2020, volatility_lag = FALSE, fund_split)
+  fe_model_2009_2019_lag <- fe_function(df, 2009, 2020, volatility_lag = TRUE, fund_split)
   
-  fe_model_2020 <- fe_function(df, 2020, 2021, 
-                               volatility_lag = FALSE, fund_split)
-  fe_model_2020_lag <- fe_function(df, 2020, 2021, 
-                                   volatility_lag = TRUE, fund_split)
+  fe_model_2020 <- fe_function(df, 2020, 2021, volatility_lag = FALSE, fund_split)
+  fe_model_2020_lag <- fe_function(df, 2020, 2021, volatility_lag = TRUE, fund_split)
   
-  fe_model_2021_2023 <- fe_function(df, 2021, 2024, 
-                                    volatility_lag = FALSE, fund_split)
-  fe_model_2021_2023_lag <- fe_function(df, 2021, 2024, 
-                                        volatility_lag = TRUE, fund_split)
+  fe_model_2021_2023 <- fe_function(df, 2021, 2024, volatility_lag = FALSE, fund_split)
+  fe_model_2021_2023_lag <- fe_function(df, 2021, 2024, volatility_lag = TRUE, fund_split)
   
   fe_models_list <- list(fe_model_2009_2019, fe_model_2020, fe_model_2021_2023,
                          fe_model_2009_2019_lag, fe_model_2020_lag,
@@ -409,6 +415,7 @@ stargazer_function <- function(fe_models_list, variables,
     mod_1 <- fe_models_list[[4]]
     mod_2 <- fe_models_list[[5]]
     mod_3 <- fe_models_list[[6]]
+    variables = c(variables, "Volatility t-1", "Volatility t-2", "Volatility t-3")
   } else {
     mod_1 <- fe_models_list[[1]]
     mod_2 <- fe_models_list[[2]]
@@ -439,11 +446,11 @@ stargazer_function <- function(fe_models_list, variables,
 #################################################################
 fe_models_list_no_lag <- data_on_fe_function(df)
 
-variables_no_lag <- c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", 
+variables <- c("ETF ownership", "log(Mktcap t-1)", "1/Price t-1", 
                       "Amihud t-1", "Bid-ask spread t-1", 
                       "Past 12-month returns t-1", "Fund ownership t-1")
 
-stargazer_function(fe_models_list_no_lag, variables_no_lag, FALSE,
+stargazer_function(fe_models_list_no_lag, variables, FALSE,
                    "Data: df, Type: no lag, Index: FALSE", "table_df_no_lag.tex")
 
 #################################################################
@@ -466,7 +473,7 @@ stargazer_function(fe_models_list_lag, variables_lag, TRUE,
 fe_models_list_no_lag_index <- data_on_fe_function(df_index)
 
 stargazer_function(fe_models_list_no_lag_index, variables_no_lag, FALSE,
-                   "Data: df, Type: no lag, Index: FALSE", "table_df_no_lag_index.tex")
+                   "Data: df, Type: no lag, Index: TRUE", "table_df_no_lag_index.tex")
 
 #################################################################
 # Data: df, Type: lag, Index: TRUE
@@ -474,7 +481,7 @@ stargazer_function(fe_models_list_no_lag_index, variables_no_lag, FALSE,
 fe_models_list_lag_index <- data_on_fe_function(df)
 
 stargazer_function(fe_models_list_lag_index, variables_lag, TRUE,
-                   "Data: df, Type: lag, Index: FALSE", "table_df_lag_index.tex")
+                   "Data: df, Type: lag, Index: TRUE", "table_df_lag_index.tex")
 
 ```
 
