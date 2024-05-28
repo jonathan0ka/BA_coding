@@ -166,4 +166,5 @@ datasets/
 R_exports/
 random/
 .Rproj.user/
-R_scripts/
+R_scripts/.RData
+
