@@ -171,6 +171,7 @@ annual_mean_function <- function(df) {
 
 annual_mean_df <- annual_mean_function(df)
 annual_mean_df_index <- annual_mean_function(df_index)
+annual_mean_df_outstanding <- annual_mean_function(df_outstanding)
 # View the result
 kable(annual_mean_df)
 kable(annual_mean_df_index)
@@ -192,15 +193,17 @@ monthly_mean <- df_clean %>%
   group_by(date) %>%
   summarize(mean_shares_outstanding = 
             weighted.mean(percent_of_traded_shares, market_cap, na.rm = TRUE),
-            mean_market_cap = weighted.mean(ETF_ownership, market_cap, na.rm = TRUE),
-            FUND_mean_shares_outstanding = weighted.mean(FUND_percent_of_traded_shares,
-                                                         market_cap, na.rm = TRUE),
+            mean_market_cap = weighted.mean(ETF_ownership, market_cap, 
+                                            na.rm = TRUE),
+            FUND_mean_shares_outstanding =
+              weighted.mean(FUND_percent_of_traded_shares,
+                            market_cap, na.rm = TRUE),
             FUND_mean_market_cap = weighted.mean(FUND_ownership, market_cap, 
                                                  na.rm = TRUE))
 
 monthly_mean
 par(mfrow = c(1,2))
-plot(x = monthly_mean$date, y = monthly_mean$mean_shares_outstanding, ylim = c(0, 26),
+plot(x = monthly_mean$date, y = monthly_mean$mean_shares_outstanding, ylim = c(0, 6),
      main = "method: shares outstanding", ylab = "weighted mean", xlab = "months", 
      type = "l")
 points(monthly_mean$date, y = monthly_mean$FUND_mean_shares_outstanding, col = "red",
@@ -229,7 +232,6 @@ legend("topright",
        legend = c("ETFs", "Mutual Funds"),
        col = c("black", "red"),
        lty = 1)
-
 ```
 
 ## find stock that pushed etf ownership up in 2015-10-31
@@ -280,6 +282,36 @@ write.xlsx(df_summarized(monthly_st_dev),
     file = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/data_statistics/non_na_counts_monthly_st_dev.xlsx", 
           row.names = FALSE)
 ```
+
+
+
+## stock specific plot
+```{r}
+unique_RIC <- unique(df_outstanding$stock_RIC)
+
+plot_stock_RIC <- function(RIC, df){
+  df_stock_RIC <- df %>%
+    filter(stock_RIC == RIC)
+  plot(df_stock_RIC$date, df_stock_RIC$percent_of_traded_shares)
+  points(df_stock_RIC$date, df_stock_RIC$INDEX_FUND_percent_of_traded_shares, 
+         col = "red")
+}
+
+plot_stock_RIC("ZURN.S", df_outstanding)
+
+
+df_tmp <- df_outstanding %>%
+  filter(stock_RIC == "ZURN.S")
+
+
+
+  plot(df_tmp$date, df_tmp$percent_of_traded_shares)
+  points(df_tmp$date, df_tmp$INDEX_FUND_percent_of_traded_shares, 
+         col = "red")
+
+plot(df_stock_RIC$date, df_stock_RIC$price)
+```
+
 
 
 # regression setups

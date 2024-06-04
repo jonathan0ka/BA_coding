@@ -202,16 +202,27 @@ library(dplyr)
 fe_function <- function(df, 
                         indep_vars, fixed_vars,
                         periode_vec,
-                        single = FALSE,
-                        volatility_lag = NA, 
-                        fund_consolidation = NA){
-  ####################################################### sample split by period
+                        setup = setup,
+                        volatility_lag = FALSE, 
+                        fund_consolidation = FALSE){
+  ################################################### sample split by period
   df_f <- df %>%
     mutate(year = as.numeric(format(date, "%Y"))) %>%
     filter(periode_vec[1] <= year & year < periode_vec[2]) 
+  
+  df_f <- df_f %>%
+    group_by(stock_RIC) %>%
+    mutate(final_ETF_ownership = 
+           scale(winsorize_var(percent_of_traded_shares/100)),
+         final_FUND_ownership =
+           scale(winsorize_var(FUND_percent_of_traded_shares/100)),
+         final_INDEX_FUND_ownership =
+           scale(winsorize_var(INDEX_FUND_percent_of_traded_shares/100)),
+         final_ACTIVE_FUND_ownership =
+           scale(winsorize_var(ACTIVE_FUND_percent_of_traded_shares/100)))
     
   ####################################################### subset
-  if(single == FALSE){
+  if(setup == "lag_fund"){
     vars_to_exclude <- c()    
     if(volatility_lag == FALSE){
       vars_to_exclude <- c(vars_to_exclude, 
@@ -219,6 +230,31 @@ fe_function <- function(df,
                            "final_T2_monthly_std_dev",
                            "final_T3_monthly_std_dev")
     }
+    if(fund_consolidation == TRUE){
+      vars_to_exclude <- c(vars_to_exclude, 
+                           "final_INDEX_FUND_ownership",
+                           "final_ACTIVE_FUND_ownership")
+    }
+    if(fund_consolidation == FALSE){
+      vars_to_exclude <- c(vars_to_exclude,
+                           "final_FUND_ownership")
+    }
+    indep_vars <- indep_vars[!indep_vars %in% vars_to_exclude]
+  }
+  
+  if(setup == "lag"){
+    vars_to_exclude <- c() 
+    if(volatility_lag == FALSE){
+      vars_to_exclude <- c(vars_to_exclude, 
+                           "final_T1_monthly_std_dev",
+                           "final_T2_monthly_std_dev",
+                           "final_T3_monthly_std_dev")
+    }
+    indep_vars <- indep_vars[!indep_vars %in% vars_to_exclude]
+  }
+  
+  if(setup == "fund"){
+    vars_to_exclude <- c() 
     if(fund_consolidation == TRUE){
       vars_to_exclude <- c(vars_to_exclude, 
                            "final_INDEX_FUND_ownership",
@@ -316,10 +352,13 @@ data_on_fe_function <- function(df, indep_vars, fixed_vars,
       df, indep_vars, fixed_vars, period, setup)
     } else if(setup == "lag"){
       models_list[['fe_model']] <- fe_function(
-      df, indep_vars, fixed_vars, period, volatility_lag = FALSE)
+      df, indep_vars, fixed_vars, period, setup, volatility_lag = FALSE)
+    } else if(setup == "fund"){
+      models_list[['fe_model']] <- fe_function(
+      df, indep_vars, fixed_vars, period, setup, fund_consolidation = FALSE)
     } else {
       models_list[['fe_model']] <- fe_function(
-      df, indep_vars, fixed_vars, period, volatility_lag = FALSE,
+      df, indep_vars, fixed_vars, period, setup, volatility_lag = FALSE,
       fund_consolidation = FALSE)
     }
     
@@ -327,14 +366,14 @@ data_on_fe_function <- function(df, indep_vars, fixed_vars,
     if(setup == "lag" || setup == "lag_fund") {
       # Add lag model
       models_list[['fe_model_lag']] <- fe_function(
-        df, indep_vars, fixed_vars, period, volatility_lag = TRUE,
+        df, indep_vars, fixed_vars, period, setup, volatility_lag = TRUE,
         fund_consolidation = FALSE)
     }
     
     if(setup == "fund" || setup == "lag_fund") {
       # Add fund model
       models_list[['fe_model_fund']] <- fe_function(
-        df, indep_vars, fixed_vars, period, 
+        df, indep_vars, fixed_vars, period, setup, 
         volatility_lag = TRUE, fund_consolidation = TRUE)
     }
     
@@ -368,16 +407,24 @@ data_on_fe_function <- function(df, indep_vars, fixed_vars,
 ```{r}
 library(fixest)
 
-style_df <- style.df(depvar.title = "", fixef.title = "", #fixef.line = "-",
-                     stats.title = "", #stats.line = "-",
+style_df <- style.df(depvar.title = "", fixef.title = "", stats.title = "",
                      yesNo = c("Yes", "No"))
 
-etable_function <- function(fe_models_list, title, 
-                               subfolder, file_name) {
+etable_function <- function(fe_models_list, title, sub_sample,
+                            subfolder, file_name) {
+  
+  ######################## path string
   folder_path = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/regression_outputs/"
   
   output_path = paste0(folder_path, subfolder, "/", file_name)
   
+  ######################## title string
+  string_representation <- sapply(sub_sample, 
+                                  function(x) paste(x, collapse = ","))
+  subsample_string <- paste(string_representation, collapse = "; ")
+  title <- paste(title, "Sub Sample:", subsample_string)
+  
+  ######################## variable labels
   variable_labels <- c(final_monthly_std_dev = "Daily Volatility", 
   final_ETF_ownership = "ETF ownership",
   log_market_cap = "log(Mktcap t-1)",
@@ -394,7 +441,8 @@ etable_function <- function(fe_models_list, title,
   final_T2_monthly_std_dev = "Volatility t-2",
   final_T3_monthly_std_dev = "Volatility t-3"
   )
-
+  
+  ######################## etable
   library(tinytex)
   library(pdftools)
   etable(fe_models_list,
@@ -593,34 +641,18 @@ indep_vars <- c("final_ETF_ownership",
                 "log_market_cap", "inv_price", "amihud_ratio",
                 "monthly_relative_spread",
                 "cumulative_return_12m", "final_FUND_ownership",
-                "final_INDEX_FUND_ownership", "final_ACTIVE_FUND_ownership",
                 "final_T1_monthly_std_dev", "final_T2_monthly_std_dev",
                 "final_T3_monthly_std_dev")
 
-periode_list <- list(c(2010, 2020), c(2020, 2021), c(2021, 2024))
+period_list <- list(c(2010, 2020), c(2020, 2021), c(2021, 2024))
 
 fe_models_list_5 <- data_on_fe_function(
-  df,indep_vars, fixed_vars, periode_list, setup = "lag_fund")
+  df_outstanding,indep_vars, fixed_vars, period_list, setup = "lag")
 
-etable_function(fe_models_list_5,
-                   "Data: df,
-                 Periods: 2010 to 2019, 2020, 2021 to 2023",
-                   "sample_split_regressions",
-                   "sample_split_df.tex")
+etable_function(fe_models_list_5, "Data: df_outstanding,",
+                sub_sample = period_list,
+                "sample_split_regressions", "sample_split_df_outstanding_fund.tex")
 
-#################################################################
-fe_models_list_6 <- data_on_fe_function(
-  df_outstanding, indep_vars, fixed_vars, periode_list, setup = "lag_fund")
-
-etable_function(fe_models_list_6,
-                   "Data: df_outstanding,
-                 Periods: 2010 to 2019, 2020, 2021 to 2023",
-                   "sample_split_regressions",
-                   "sample_split_df_outstanding.tex")
-
-
-#################################################################
-# Data: df and df_outstanding
 #################################################################
 fixed_vars <- c("stock_RIC", "month")
 indep_vars <- c("final_ETF_ownership",
@@ -631,16 +663,38 @@ indep_vars <- c("final_ETF_ownership",
                 "final_T1_monthly_std_dev", "final_T2_monthly_std_dev",
                 "final_T3_monthly_std_dev")
 
-periode_list <- list(c(2010, 2015), c(2015, 2020), c(2020, 2024))
+fe_models_list_6 <- data_on_fe_function(
+  df_outstanding, indep_vars, fixed_vars, periode_list, setup = "lag_fund")
 
-fe_models_list_6 <- data_on_fe_function(df_outstanding,
-                                        indep_vars, fixed_vars,
-                                        periode_list, setup = "lag_fund")
 etable_function(fe_models_list_6,
-                   "Data: df_index,
-                 Periods: 2010 to 2014, 2015 to 2019, 2020 to 2023",
+                   "Data: df_outstanding",
+                 sub_sample = period_list,
                    "sample_split_regressions",
-                   "sample_split_2_df_outstanding.tex")
+                   "sample_split_df_outstanding_fund_split.tex")
+
+
+#################################################################
+# Data: df and df_outstanding
+#################################################################
+fixed_vars <- c("stock_RIC", "month")
+indep_vars <- c("final_ETF_ownership",
+                "log_market_cap", "inv_price", "amihud_ratio",
+                "monthly_relative_spread",
+                "cumulative_return_12m",
+                "final_INDEX_FUND_ownership", "final_ACTIVE_FUND_ownership",
+                "final_T1_monthly_std_dev", "final_T2_monthly_std_dev",
+                "final_T3_monthly_std_dev")
+
+period_list <- list(c(2010, 2015), c(2015, 2020), c(2020, 2024))
+
+fe_models_list_7 <- data_on_fe_function(df_outstanding,
+                                        indep_vars, fixed_vars,
+                                        period_list, setup = "lag")
+etable_function(fe_models_list_7,
+                   "Data: df_index",
+                sub_sample = period_list,
+                   "sample_split_regressions",
+                   "sample_equal_split_df_outstanding.tex")
 ```
 
 ### fund only regressions
@@ -652,21 +706,59 @@ fixed_vars <- c("stock_RIC", "month")
 indep_vars <- c("final_ETF_ownership",
                 "log_market_cap", "inv_price", "amihud_ratio",
                 "monthly_relative_spread",
-                "cumulative_return_12m", "final_FUND_ownership",
+                "cumulative_return_12m", "final_INDEX_FUND_ownership",
+                "final_ACTIVE_FUND_ownership",
                 "final_T1_monthly_std_dev", "final_T2_monthly_std_dev",
                 "final_T3_monthly_std_dev")
 
 periode_list <- list(c(2010, 2020), c(2020, 2021), c(2021, 2024))
 
-fe_models_list_7 <- data_on_fe_function(df,
+fe_models_list_7 <- data_on_fe_function(df_outstanding,
                                         indep_vars, fixed_vars,
                                         periode_list, setup = "lag")
 etable_function(fe_models_list_7,
-                   "Data: df_index,
+                   "Data: df_outstanding,
                  Periods: 2010 to 2019, 2020, 2021 to 2023",
                    "sample_split_regressions",
-                   "sample_split_df_outstanding_fund.tex")
+                   "sample_split_df_outstanding_fund_split.tex")
 ```
+
+#### two year intervall regression
+```{r}
+#################################################################
+# Data: df_outstanding
+#################################################################
+fixed_vars <- c(NA)
+indep_vars <- c("final_ETF_ownership",
+                "log_market_cap", "inv_price", "amihud_ratio",
+                "monthly_relative_spread",
+                "cumulative_return_12m", "final_INDEX_FUND_ownership",
+                "final_ACTIVE_FUND_ownership",
+                "final_T1_monthly_std_dev", "final_T2_monthly_std_dev",
+                "final_T3_monthly_std_dev")
+
+period_list <- list(c(2010, 2011), c(2011, 2012), c(2012, 2013),
+                    c(2013, 2014), c(2014, 2015), c(2015, 2016),
+                    c(2016, 2017), c(2017, 2018), c(2018, 2019),
+                    c(2019, 2020), c(2020, 2021), c(2021, 2022),
+                    c(2022, 2023), c(2023, 2024))
+period_list <- list(c(2010, 2024))
+  
+  
+  
+  
+
+
+fe_models_list_7 <- data_on_fe_function(df_outstanding,
+                                        indep_vars, fixed_vars,
+                                        period_list, setup = "lag")
+etable_function(fe_models_list_7,
+                title = "Data: df_outstanding",
+                sub_sample = period_list,
+                   "sample_split_regressions",
+                   "sample_split_df_outstanding_julius.tex")
+```
+
 
 
 # old code
