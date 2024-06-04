@@ -7,7 +7,7 @@ from datetime import datetime
 # Constants
 HSG_24_API_KEY = "825c77d2d6cb4b3ba41d25d4c0b87c46325cd98c"
 UZH_2_API_KEY = "80631b9534434526bb7b73ad26db914d4c2d9769"
-EXPORT_CSV_FILE_PATH = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data_countries.csv"
+CSV_FILE_PATH = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\stock_level_data\\stock_level_data_countries.csv"
 RIC_FILE_PATH = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\formated_constituents_stoxx_europe_600.csv"
 
 def get_first_last_days(start_date_s, end_date_s):
@@ -22,7 +22,7 @@ def read_and_process_ric_data():
     ric_df = ric_df.drop_duplicates(subset="stock_RIC")
     return ric_df['stock_RIC'].tolist()
 
-def initialize_csv(col_names, first_time = FALSE):
+def initialize_csv(col_names, first_time = False):
     aggregated_df = pd.DataFrame(columns=col_names)
     aggregated_df.to_csv(CSV_FILE_PATH, index=False)
 
