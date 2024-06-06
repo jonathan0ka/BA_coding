@@ -154,10 +154,13 @@ annual_mean_function <- function(df) {
               
               active_fund_1 = weighted.mean(ACTIVE_FUND_ownership, market_cap,
                                                  na.rm = TRUE) * 100,
-              active_fund_2 = weighted.mean(ACTIVE_FUND_percent_of_traded_shares,
-                                            market_cap, na.rm = TRUE),
+              active_fund_2 =
+                weighted.mean(ACTIVE_FUND_percent_of_traded_shares,
+                              market_cap, na.rm = TRUE),
               active_fund_market_cap = sum(ACTIVE_FUND_stock_value_held, 
                                            na.rm = TRUE)/10000,
+              std_dev = weighted.mean(monthly_std_dev, market_cap, 
+                                       na.rm = TRUE),
               .groups = "drop")
   
   annual_mean$year <- as.character(annual_mean$year)
@@ -172,9 +175,18 @@ annual_mean_function <- function(df) {
 annual_mean_df <- annual_mean_function(df)
 annual_mean_df_index <- annual_mean_function(df_index)
 annual_mean_df_outstanding <- annual_mean_function(df_outstanding)
+
 # View the result
-kable(annual_mean_df)
+kable(annual_mean_df_outstanding)
 kable(annual_mean_df_index)
+
+
+
+
+library(openxlsx)
+write.xlsx(monthly_mean, 
+          file = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/data_statistics/monthly_mean.xlsx", 
+          row.names = FALSE)
 
 annual_mean_df_subset <- annual_mean_df %>%
   select(year, etf_1, etf_market_cap, index_fund_1, index_fund_market_cap,
@@ -191,17 +203,46 @@ df_clean <- df[!is.na(df$percent_of_traded_shares) & !is.na(df$market_cap) & df$
 
 monthly_mean <- df_clean %>%
   group_by(date) %>%
-  summarize(mean_shares_outstanding = 
-            weighted.mean(percent_of_traded_shares, market_cap, na.rm = TRUE),
-            mean_market_cap = weighted.mean(ETF_ownership, market_cap, 
-                                            na.rm = TRUE),
-            FUND_mean_shares_outstanding =
-              weighted.mean(FUND_percent_of_traded_shares,
-                            market_cap, na.rm = TRUE),
-            FUND_mean_market_cap = weighted.mean(FUND_ownership, market_cap, 
-                                                 na.rm = TRUE))
+  summarize(etf_1 = weighted.mean(ETF_ownership, 
+                                             market_cap, na.rm = TRUE) * 100,
+              etf_2 = weighted.mean(percent_of_traded_shares, market_cap,
+                                          na.rm = TRUE),
+              etf_market_cap = sum(stock_value_held, na.rm = TRUE)/10000,
+              
+              fund_1 = weighted.mean(FUND_ownership, market_cap,
+                                                 na.rm = TRUE) * 100,
+              fund_2 = weighted.mean(FUND_percent_of_traded_shares, market_cap,
+                                          na.rm = TRUE),
+              fund_market_cap = sum(FUND_stock_value_held, na.rm = TRUE)/10000,
+              
+              index_fund_1 = weighted.mean(INDEX_FUND_ownership, market_cap,
+                                                 na.rm = TRUE) * 100,
+              index_fund_2 = weighted.mean(INDEX_FUND_percent_of_traded_shares,
+                                           market_cap, na.rm = TRUE),
+              index_fund_market_cap = sum(INDEX_FUND_stock_value_held, 
+                                          na.rm = TRUE)/10000,
+              
+              active_fund_1 = weighted.mean(ACTIVE_FUND_ownership, market_cap,
+                                                 na.rm = TRUE) * 100,
+              active_fund_2 =
+                weighted.mean(ACTIVE_FUND_percent_of_traded_shares,
+                              market_cap, na.rm = TRUE),
+              active_fund_market_cap = sum(ACTIVE_FUND_stock_value_held, 
+                                           na.rm = TRUE)/10000,
+              std_dev = weighted.mean(monthly_std_dev, market_cap, 
+                                       na.rm = TRUE),
+              .groups = "drop")
 
 monthly_mean
+
+######### xlsx export
+library(openxlsx)
+write.xlsx(monthly_mean, 
+          file = "/Users/jonathanzeh/Library/CloudStorage/OneDrive-Personal/BA_Thesis/BA_coding/R_exports/data_statistics/monthly_mean.xlsx", 
+          row.names = FALSE)
+
+
+########## plots
 par(mfrow = c(1,2))
 plot(x = monthly_mean$date, y = monthly_mean$mean_shares_outstanding, ylim = c(0, 6),
      main = "method: shares outstanding", ylab = "weighted mean", xlab = "months", 
