@@ -22,7 +22,7 @@ for specific_date in business_days:
     
     # Get the constituents of the index
     df, err = ek.get_data(
-        instruments=['.STOXX'],
+        instruments=['.STOXX50'],
         fields=['TR.IndexConstituentRIC', 'TR.IndexConstituentName'],
         parameters={'SDate': sdate_for_year}
     )
@@ -41,6 +41,6 @@ for specific_date in business_days:
 columns_to_keep = ["Constituent RIC", "Constituent Name", "Date"]
 aggregated_df = aggregated_df[columns_to_keep]
 
-file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\constituents_stoxx_europe_600_v4.csv"
+file_path = "C:\\Users\\Shadow\\OneDrive\\BA_Thesis\\BA_coding\\datasets\\eikon_data\\index_constituents_data\\STOXX_EUROPE_50\\constituents_stoxx_europe_50_v4.csv"
 aggregated_df.to_csv(file_path, index=False)
 print(f"Data exported successfully")
