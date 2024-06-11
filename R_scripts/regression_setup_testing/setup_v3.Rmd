@@ -106,24 +106,17 @@ df <- df %>%
 # index member data set
 ## Filtering
 ```{r}
-non_index_members_to_NA <- function(data) {
-  outlier_rows <- which(data[["index_member"]] == 0)
+non_index_members_to_NA <- function(col_name, data) {
+  outlier_rows <- which(data[[col_name]] == 0)
 
   # replace entire rows with NA where an outlier is detected
   if (length(outlier_rows) > 0) {
-    data[outlier_rows, -(1:3)] <- NA
+    data[outlier_rows, -(1:4)] <- NA
   }
-  return(data)
-}
-
-df_index <- non_index_members_to_NA(df)
-```
-
-## oustanding df
-```{r}
-df_outstanding <- df_index %>%
-  group_by(stock_RIC) %>%
-  mutate(final_ETF_ownership = 
+  
+  data <- data %>%
+    group_by(stock_RIC) %>%
+    mutate(final_ETF_ownership = 
            scale(winsorize_var(percent_of_traded_shares/100)),
          final_FUND_ownership =
            scale(winsorize_var(FUND_percent_of_traded_shares/100)),
@@ -131,6 +124,13 @@ df_outstanding <- df_index %>%
            scale(winsorize_var(INDEX_FUND_percent_of_traded_shares/100)),
          final_ACTIVE_FUND_ownership =
            scale(winsorize_var(ACTIVE_FUND_percent_of_traded_shares/100)))
+  
+  
+  return(data)
+}
+
+df_outstanding<- non_index_members_to_NA("index_member_600", df)
+df_50 <- non_index_members_to_NA("index_member_50", df)
 ```
 
 # statistics
@@ -606,7 +606,7 @@ etable_function(fe_models_list_5,
 ### Full sample
 ```{r}
 periode_list <- list(c(2011, 2024))
-fixed_vars <- c("stock_RIC", "headquarters_country","month")
+fixed_vars <- c("stock_RIC","month")
 
 #################################################################
 # Setup 1
@@ -616,8 +616,7 @@ indep_vars <- c("final_ETF_ownership",
                 "monthly_relative_spread",
                 "cumulative_return_12m")
 
-fe_models_list_1 <- data_on_fe_function(
-  df_outstanding, indep_vars, fixed_vars, periode_list, setup = "single")
+fe_models_list_1 <- data_on_fe_function(df_50, indep_vars, fixed_vars, periode_list, setup = "single")
 
 #################################################################
 # Setup 2
@@ -627,7 +626,7 @@ indep_vars <- c("final_ETF_ownership",
                 "monthly_relative_spread",
                 "cumulative_return_12m", "final_FUND_ownership")
 fe_models_list_2 <- data_on_fe_function(
-  df_outstanding, indep_vars, fixed_vars, periode_list, setup = "single")
+  df_50, indep_vars, fixed_vars, periode_list, setup = "single")
 
 #################################################################
 # Setup 3
@@ -639,7 +638,7 @@ indep_vars <- c("final_ETF_ownership",
                 "final_ACTIVE_FUND_ownership")
 
 fe_models_list_3 <- data_on_fe_function(
-  df_outstanding, indep_vars, fixed_vars, periode_list, setup = "single")
+  df_50, indep_vars, fixed_vars, periode_list, setup = "single")
 
 #################################################################
 # Setup 4
@@ -652,7 +651,7 @@ indep_vars <- c("final_ETF_ownership",
                 "final_T2_monthly_std_dev", "final_T3_monthly_std_dev")
 
 fe_models_list_4 <- data_on_fe_function(
-  df_outstanding, indep_vars, fixed_vars, periode_list, setup = "single")
+  df_50, indep_vars, fixed_vars, periode_list, setup = "single")
 
 #################################################################
 # Regression table
@@ -661,7 +660,7 @@ combined_list <- list(fe_models_list_1[[1]], fe_models_list_2[[1]],
                       fe_models_list_3[[1]], fe_models_list_4[[1]])
 
 etable_function(combined_list,
-                cluster = fixed_vars,
+                cluster = c("stock_RIC"),
                 "Data: df_outstanding, Full Sample,",
                 sub_sample = periode_list,
                    "full_sample_regressions",
@@ -715,7 +714,7 @@ etable_function(fe_models_list_6,
                    "sample_split_df_outstanding_fund_split.tex")
 
 
-#################################################################
+  #################################################################
 # Data: df and df_outstanding
 #################################################################
 fixed_vars <- c("stock_RIC", "quarter")
