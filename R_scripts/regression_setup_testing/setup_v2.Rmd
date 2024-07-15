@@ -137,18 +137,24 @@ annual_mean_function <- function(df) {
                                              market_cap, na.rm = TRUE) * 100,
               etf_2 = weighted.mean(percent_of_traded_shares, market_cap,
                                           na.rm = TRUE),
+              etf_stock_mean = mean(percent_of_traded_shares, na.rm = TRUE),
+              etf_stock_median = median(percent_of_traded_shares, 
+                                         na.rm = TRUE),
               etf_market_cap = sum(stock_value_held, na.rm = TRUE)/10000,
               
               fund_1 = weighted.mean(FUND_ownership, market_cap,
                                                  na.rm = TRUE) * 100,
               fund_2 = weighted.mean(FUND_percent_of_traded_shares, market_cap,
-                                          na.rm = TRUE),
+                                     na.rm = TRUE),
               fund_market_cap = sum(FUND_stock_value_held, na.rm = TRUE)/10000,
               
               index_fund_1 = weighted.mean(INDEX_FUND_ownership, market_cap,
                                                  na.rm = TRUE) * 100,
               index_fund_2 = weighted.mean(INDEX_FUND_percent_of_traded_shares,
                                            market_cap, na.rm = TRUE),
+              index_fund_mean = mean(INDEX_FUND_percent_of_traded_shares, na.rm = TRUE),
+              index_fund_median = median(INDEX_FUND_percent_of_traded_shares, 
+                                         na.rm = TRUE),
               index_fund_market_cap = sum(INDEX_FUND_stock_value_held, 
                                           na.rm = TRUE)/10000,
               
@@ -157,6 +163,10 @@ annual_mean_function <- function(df) {
               active_fund_2 =
                 weighted.mean(ACTIVE_FUND_percent_of_traded_shares,
                               market_cap, na.rm = TRUE),
+              active_fund_mean = mean(ACTIVE_FUND_percent_of_traded_shares, 
+                                      na.rm = TRUE),
+              active_fund_median = median(ACTIVE_FUND_percent_of_traded_shares, 
+                                         na.rm = TRUE),
               active_fund_market_cap = sum(ACTIVE_FUND_stock_value_held, 
                                            na.rm = TRUE)/10000,
               std_dev = weighted.mean(monthly_std_dev, market_cap, 
@@ -172,13 +182,14 @@ annual_mean_function <- function(df) {
   return(annual_mean)
 }
 
-annual_mean_df <- annual_mean_function(df)
-annual_mean_df_index <- annual_mean_function(df_index)
-annual_mean_df_outstanding <- annual_mean_function(df_outstanding)
+annual_mean_df <- annual_mean_function(df_600)
+annual_mean_df_50 <- annual_mean_function(df_50)
+annual_mean_df_600_ex_50 <- annual_mean_function(df_600_ex_50)
 
 # View the result
-kable(annual_mean_df_outstanding)
-kable(annual_mean_df_index)
+kable(annual_mean_df)
+kable(annual_mean_df_50)
+kable(annual_mean_df_600_ex_50)
 
 
 
