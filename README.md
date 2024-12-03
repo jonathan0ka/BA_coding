@@ -1,5 +1,4 @@
-Two most relevant scripts: 
+# Two most relevant scripts: 
 
-Code for Panel Regressions:
-
-Code API Request Refinitiv Eikon:
+- Code for Panel Regressions: R_scripts/R_scripts/regression_setup/regression_setup_final.Rmd
+- Code API Request Refinitiv Eikon:
